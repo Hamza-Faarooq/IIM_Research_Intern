@@ -59,4 +59,15 @@
 4. Stratified train/val/test split (60/20/20)
 
 
+## 🙏 Acknowledgments
+- **CLIP** [[Paper]](https://arxiv.org/abs/2103.00020) [[Code]](https://github.com/openai/CLIP)
+- **SANCL Framework** [[Paper]](https://aclanthology.org/2022.coling-1.499.pdf)
+- Compute resources provided by [Your Institution]
+
+---
+
+**Let's connect!**  
+[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?logo=twitter&logoColor=white)](https://twitter.com/yourhandle)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?logo=linkedin&logoColor=white)](https://linkedin.com/in/yourprofile)
+
 
