@@ -62,7 +62,7 @@
 ## 🙏 Acknowledgments
 - **CLIP** [[Paper]](https://arxiv.org/abs/2103.00020) [[Code]](https://github.com/openai/CLIP)
 - **SANCL Framework** [[Paper]](https://aclanthology.org/2022.coling-1.499.pdf)
-- Compute resources provided by [Your Institution]
+
 
 ---
 
