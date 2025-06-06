@@ -47,9 +47,10 @@
 
 ## 📊 Dataset
 ### IMDB Reviews + Movie Stills
-- **4,017** curated IMDB reviews with helpfulness labels
-- **1,443** high-resolution frames from 15 sci-fi movies
+- **4,000+** curated IMDB reviews per movie with helpfulness labels
+- **2000+** high-resolution frames per movie from 10 movies
 - Balanced 50-50 split between helpful/unhelpful reviews
+- Worked with a total of 24000+ images and 34000+ reviews.
 
 
 ### Preprocessing Steps
