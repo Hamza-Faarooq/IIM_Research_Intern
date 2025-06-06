@@ -51,5 +51,12 @@
 - **1,443** high-resolution frames from 15 sci-fi movies
 - Balanced 50-50 split between helpful/unhelpful reviews
 
-Dataset Structure:
+
+### Preprocessing Steps
+1. HTML/CSS removal from raw reviews
+2. K-notation vote conversion (1.2K → 1200)
+3. CLIP-based frame selection for each review
+4. Stratified train/val/test split (60/20/20)
+
+
 
