@@ -43,4 +43,13 @@
 - NVIDIA GPU with CUDA 11.7
 - 16GB+ RAM
 
-### Quick Start
+
+
+## 📊 Dataset
+### IMDB Reviews + Movie Stills
+- **4,017** curated IMDB reviews with helpfulness labels
+- **1,443** high-resolution frames from 15 sci-fi movies
+- Balanced 50-50 split between helpful/unhelpful reviews
+
+Dataset Structure:
+
