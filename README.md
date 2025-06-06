@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <div align="center">
-  <img src="assets/pipeline.png" alt="Architecture Diagram" width="800"/>
+  <img src="IIM_Research_Intern/main_architecture.png" alt="Architecture Diagram" width="800"/>
   <p>Project Architecture: CLIP-based alignment + Multimodal fusion</p>
 </div>
 
