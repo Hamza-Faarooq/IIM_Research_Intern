@@ -1,0 +1,1 @@
+Extraction done from IMDB review pages for a total of ten movies as per our current standards.
