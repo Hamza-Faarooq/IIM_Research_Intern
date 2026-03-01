@@ -124,34 +124,34 @@
             <div class="story-box">
                 "The sheer isolation of humanity was perfectly captured in that single, silent wide shot of the Endurance."
             </div>
-            [cite_start]<p>If you feed this <em>Interstellar</em> review into a standard Natural Language Processing (NLP) model, it registers the positive sentiment but faces a profound semantic gap when visual context is crucial[cite: 28]. The reviewer references a specific cinematic frame entirely absent from the text. </p>
-            [cite_start]<p>Predicting review helpfulness is critical for Recommender Systems (RS)[cite: 27]. [cite_start]However, relying solely on user-voted helpfulness introduces noise and bias, often overlooking high-quality reviews due to low visibility[cite: 29]. [cite_start]While multimodal models like UNITER, ViLBERT, and MCR exist, they suffer from a fatal flaw in high-context domains: they assume inherent visual-text relevance, overlooking semantic misalignment in movie reviews[cite: 35, 36, 37]. If the review discusses a "wide shot," but the model is fed a generic movie poster, the fusion process generates noise rather than insight.</p>
+            <p>If you feed this <em>Interstellar</em> review into a standard Natural Language Processing (NLP) model, it registers the positive sentiment but faces a profound semantic gap when visual context is crucial[cite: 28]. The reviewer references a specific cinematic frame entirely absent from the text. </p>
+           <p>Predicting review helpfulness is critical for Recommender Systems (RS). However, relying solely on user-voted helpfulness introduces noise and bias, often overlooking high-quality reviews due to low visibility[cite: 29]. While multimodal models like UNITER, ViLBERT, and MCR exist, they suffer from a fatal flaw in high-context domains: they assume inherent visual-text relevance, overlooking semantic misalignment in movie reviews[cite: 35, 36, 37]. If the review discusses a "wide shot," but the model is fed a generic movie poster, the fusion process generates noise rather than insight.</p>
         </section>
 
         <section data-aos="fade-up">
             <h2>2. Data Formulation & Thresholding</h2>
-            <p>Before building the architecture, we needed a mathematically sound target variable. [cite_start]We curated over 40,000 IMDb user reviews and 24,000 keyframes[cite: 105, 106]. [cite_start]Helpfulness, reflecting the extent to which a review influences consumer decision-making[cite: 32], is traditionally represented as a ratio of votes.</p>
+            <p>Before building the architecture, we needed a mathematically sound target variable. We curated over 40,000 IMDb user reviews and 24,000 keyframes[cite: 105, 106]. Helpfulness, reflecting the extent to which a review influences consumer decision-making[cite: 32], is traditionally represented as a ratio of votes.</p>
             
             <div class="math-block">
                 $$ \text{Helpfulness Score} = \frac{H}{H + U} $$
-                [cite_start]<div class="math-caption">Where $H$ denotes "helpful" votes and $U$ represents "unhelpful" votes[cite: 111, 113].</div>
+                <div class="math-caption">Where $H$ denotes "helpful" votes and $U$ represents "unhelpful" votes[cite: 111, 113].</div>
             </div>
 
-            [cite_start]<p>For example, a review with 12 helpful and 3 unhelpful votes yields a score of $0.8$[cite: 116]. [cite_start]We binarized this into a classification task, empirically selecting a threshold of $0.54$[cite: 117, 120]. [cite_start]This specific value balances class distribution while ensuring semantic relevance; higher thresholds showed severely unbalanced classes and reduced dataset size, which would have undermined the study[cite: 118].</p>
+            <p>For example, a review with 12 helpful and 3 unhelpful votes yields a score of $0.8$[cite: 116]. We binarized this into a classification task, empirically selecting a threshold of $0.54$[cite: 117, 120]. This specific value balances class distribution while ensuring semantic relevance; higher thresholds showed severely unbalanced classes and reduced dataset size, which would have undermined the study[cite: 118].</p>
         </section>
 
         <section data-aos="fade-up">
             <h2>3. Dynamic Visual Grounding (CLIP)</h2>
-            [cite_start]<p>To solve the misalignment problem, our framework incorporates a Contrastive Language-Image Pre-training (CLIP) guided alignment module to select the most relevant movie frame for each review dynamically[cite: 14]. [cite_start]We compute the cosine similarity between the embedded review $e_r$ and a set of candidate movie stills $e_f$[cite: 138, 152].</p>
+            <p>To solve the misalignment problem, our framework incorporates a Contrastive Language-Image Pre-training (CLIP) guided alignment module to select the most relevant movie frame for each review dynamically[cite: 14]. We compute the cosine similarity between the embedded review $e_r$ and a set of candidate movie stills $e_f$[cite: 138, 152].</p>
 
             <div class="math-block">
                 $$ align(r_i, f_j) = \cos(\text{CLIP}_{text}(r_i), \text{CLIP}_{image}(f_j)) $$
                 <br>
                 $$ f^* = \arg\max_{f} \cos(e_r, e_f) $$
-                [cite_start]<div class="math-caption">Selecting the optimal frame $f^*$ that maximizes semantic alignment[cite: 143, 148].</div>
+                <div class="math-caption">Selecting the optimal frame $f^*$ that maximizes semantic alignment[cite: 143, 148].</div>
             </div>
 
-            [cite_start]<p>The necessity for this CLIP-based alignment is emphasized by visually dense films like <em>Interstellar</em> and <em>Fellowship of the Ring</em>, domains where unimodal models are particularly susceptible to failure[cite: 31]. [cite_start]We manually validated a subset of 500 review-image pairs to adjust the similarity threshold and optimize alignment accuracy against pseudo-labeling bias[cite: 145].</p>
+            <p>The necessity for this CLIP-based alignment is emphasized by visually dense films like <em>Interstellar</em> and <em>Fellowship of the Ring</em>, domains where unimodal models are particularly susceptible to failure[cite: 31]. We manually validated a subset of 500 review-image pairs to adjust the similarity threshold and optimize alignment accuracy against pseudo-labeling bias[cite: 145].</p>
 
 <pre><code class="language-python">import torch
 import torch.nn.functional as F
@@ -174,7 +174,7 @@ def get_optimal_frame(review_emb, frame_embs):
 
         <section data-aos="fade-up">
             <h2>4. The Dual-Encoder Architecture</h2>
-            <p>Once the review $r_i$ and the optimal frame $f^*$ are paired, we extract dense semantic representations. [cite_start]The textual analysis utilizes BERT to generate $h_{text} \in \mathbb{R}^{768}$[cite: 121, 123, 127]. [cite_start]Simultaneously, the visual analysis employs a Vision Transformer (ViT) to produce frame features $h_{visual} \in \mathbb{R}^{768}$[cite: 131, 133, 136].</p>
+            <p>Once the review $r_i$ and the optimal frame $f^*$ are paired, we extract dense semantic representations. The textual analysis utilizes BERT to generate $h_{text} \in \mathbb{R}^{768}$[cite: 121, 123, 127]. Simultaneously, the visual analysis employs a Vision Transformer (ViT) to produce frame features $h_{visual} \in \mathbb{R}^{768}$[cite: 131, 133, 136].</p>
             
             <img src="https://raw.githubusercontent.com/Hamza-Faarooq/IIM_Research_Intern/main/model_architecture/main_architecture.png" alt="Model Architecture" class="architecture-img">
             <p style="text-align: center; font-size: 0.9rem; color: var(--text-muted);"><em>Fig 1: The full pipeline: Text reviews encoded via BERT, keyframes via ViT, guided by CLIP.</em></p>
@@ -182,39 +182,39 @@ def get_optimal_frame(review_emb, frame_embs):
 
         <section data-aos="fade-up">
             <h2>5. Uncertainty Management: Evidential Fusion</h2>
-            [cite_start]<p>Modern models frequently employ shallow fusion techniques like concatenation or fixed attention, which overlook modality-level uncertainty[cite: 73, 74]. [cite_start]When visuals are symbolic and texts are hyperbolic, deterministic models risk overfitting or making overconfident predictions[cite: 74, 75].</p>
-            [cite_start]<p>We introduced a belief-theoretic strategy based on Dempster-Shafer theory[cite: 80]. [cite_start]It models belief mass for each modality ($m_1, m_2$) and explicitly quantifies conflicts ($K$)[cite: 81]. If the text implies a review is helpful but the image is irrelevant, $K$ increases.</p>
+            <p>Modern models frequently employ shallow fusion techniques like concatenation or fixed attention, which overlook modality-level uncertainty[cite: 73, 74]. When visuals are symbolic and texts are hyperbolic, deterministic models risk overfitting or making overconfident predictions[cite: 74, 75].</p>
+            <p>We introduced a belief-theoretic strategy based on Dempster-Shafer theory[cite: 80]. It models belief mass for each modality ($m_1, m_2$) and explicitly quantifies conflicts ($K$)[cite: 81]. If the text implies a review is helpful but the image is irrelevant, $K$ increases.</p>
 
             <div class="math-block">
                 $$ K = \sum_{i \neq j} m_1(i) \cdot m_2(j) $$
                 <br>
                 $$ m_{fused} = \frac{m_1 \cdot m_2}{1 - K} $$
-                <div class="math-caption">Equation 6 and 7: $K$ quantifies the total conflict between the two belief sources. [cite_start]The fused mass is normalized by $(1-K)$[cite: 162, 167, 169].</div>
+                <div class="math-caption">Equation 6 and 7: $K$ quantifies the total conflict between the two belief sources. The fused mass is normalized by $(1-K)$[cite: 162, 167, 169].</div>
             </div>
 
-            [cite_start]<p>Intuitively, when text and visual cues agree, belief is reinforced; when they conflict, the framework balances evidence based on uncertainty, yielding more robust predictions[cite: 173]. [cite_start]Both heads share this fused representation and are trained jointly using a multi-task loss formulation[cite: 181]:</p>
+            <p>Intuitively, when text and visual cues agree, belief is reinforced; when they conflict, the framework balances evidence based on uncertainty, yielding more robust predictions[cite: 173]. Both heads share this fused representation and are trained jointly using a multi-task loss formulation[cite: 181]:</p>
             
             <div class="math-block">
                 $$ \mathcal{L} = \lambda_1 \cdot \mathcal{L}_{help} + \lambda_2 \cdot \mathcal{L}_{align} $$
-                [cite_start]<div class="math-caption">Where $\lambda_1$ and $\lambda_2$ represent the weighting coefficients[cite: 182, 183]. [cite_start]We trained using the Adam optimizer (lr 3e-5, batch size 16)[cite: 185].</div>
+                <div class="math-caption">Where $\lambda_1$ and $\lambda_2$ represent the weighting coefficients[cite: 182, 183]. We trained using the Adam optimizer (lr 3e-5, batch size 16)[cite: 185].</div>
             </div>
         </section>
 
         <section data-aos="fade-up">
             <h2>6. Training Dynamics & Benchmarks</h2>
-            [cite_start]<p>We benchmarked evidential fusion against direct concatenation and attention-based fusion on a curated dataset of over 40,000+ review-image pairs[cite: 15, 192]. [cite_start]Evidential fusion achieves the best ranking performance, securing a Mean Average Precision (MAP) of 0.87 and an NDCG of 0.97[cite: 16].</p>
+            <p>We benchmarked evidential fusion against direct concatenation and attention-based fusion on a curated dataset of over 40,000+ review-image pairs[cite: 15, 192]. Evidential fusion achieves the best ranking performance, securing a Mean Average Precision (MAP) of 0.87 and an NDCG of 0.97[cite: 16].</p>
             
             <div class="chart-container">
                 <canvas id="trainingChart" height="250"></canvas>
             </div>
 
-            <p>To understand model behavior, we analyzed training dynamics on the highly complex <em>Interstellar</em> dataset. [cite_start]Evidential fusion demonstrates significantly smoother convergence and lower loss variance compared to the erratic trends observed in attention-based fusion[cite: 213, 215]. [cite_start]It stabilizes efficiently around epoch 10[cite: 216].</p>
-            <p>Model performance varied heavily by narrative type. [cite_start]Evidential fusion performed best on semantically dense films like <em>Interstellar</em> (MAP: 0.90), while attention-based fusion excelled in dialogue-heavy narratives like <em>The Godfather</em> (MAP: 0.87)[cite: 200, 204, 206]. [cite_start]Simple concatenation yielded solid results for visually grounded action films like <em>The Dark Knight</em>[cite: 201].</p>
+            <p>To understand model behavior, we analyzed training dynamics on the highly complex <em>Interstellar</em> dataset. Evidential fusion demonstrates significantly smoother convergence and lower loss variance compared to the erratic trends observed in attention-based fusion[cite: 213, 215]. It stabilizes efficiently around epoch 10[cite: 216].</p>
+            <p>Model performance varied heavily by narrative type. Evidential fusion performed best on semantically dense films like <em>Interstellar</em> (MAP: 0.90), while attention-based fusion excelled in dialogue-heavy narratives like <em>The Godfather</em> (MAP: 0.87)[cite: 200, 204, 206]. Simple concatenation yielded solid results for visually grounded action films like <em>The Dark Knight</em>[cite: 201].</p>
         </section>
 
         <section data-aos="fade-up">
             <h2>6. Empirical Results & Training Dynamics</h2>
-            [cite_start]<p>To deeply understand the optimization landscape and model behavior, we analyzed the training dynamics on the highly complex <em>Interstellar</em> dataset[cite: 213]. The visualizations below break down convergence stability, validation metrics, and cross-genre robustness.</p>
+            <p>To deeply understand the optimization landscape and model behavior, we analyzed the training dynamics on the highly complex <em>Interstellar</em> dataset[cite: 213]. The visualizations below break down convergence stability, validation metrics, and cross-genre robustness.</p>
 
 
 
@@ -227,7 +227,7 @@ def get_optimal_frame(review_emb, frame_embs):
             <div class="vis-container">
                 <div class="vis-text">
                     <h3>Optimization & Convergence Stability</h3>
-                    [cite_start]<p>Figure 2(a) illustrates the epoch-wise training loss[cite: 214]. Modern multimodal models often suffer from unstable gradients during early epochs due to modality conflict. [cite_start]As seen in <strong>Vis 1</strong>, evidential fusion demonstrates significantly smoother convergence and lower loss variance compared to the erratic trends observed in attention-based fusion[cite: 215]. By mathematically discounting conflicting modality signals via the Dempster-Shafer conflict mass ($K$), the network avoids steep gradient cliffs. [cite_start]This low-variance optimization highlights the inherent robustness in belief-theoretic weighting[cite: 217].</p>
+                    <p>Figure 2(a) illustrates the epoch-wise training loss[cite: 214]. Modern multimodal models often suffer from unstable gradients during early epochs due to modality conflict. As seen in <strong>Vis 1</strong>, evidential fusion demonstrates significantly smoother convergence and lower loss variance compared to the erratic trends observed in attention-based fusion[cite: 215]. By mathematically discounting conflicting modality signals via the Dempster-Shafer conflict mass ($K$), the network avoids steep gradient cliffs. This low-variance optimization highlights the inherent robustness in belief-theoretic weighting[cite: 217].</p>
                 </div>
                 <div class="vis-image">
                     <img src="visualisations/vis1.png" alt="Training Loss Dynamics" class="architecture-img" style="margin: 0;">
@@ -238,7 +238,7 @@ def get_optimal_frame(review_emb, frame_embs):
             <div class="vis-container reverse">
                 <div class="vis-text">
                     <h3>Validation Generalization (AUC & F1)</h3>
-                    <p>While attention-based models show rapid early memorization, they tend to oscillate heavily on validation sets containing hyperbolic user reviews. <strong>Vis 2</strong> tracks the validation AUC over training epochs. [cite_start]Evidential fusion stabilizes efficiently around epoch 10 and maintains superior AUC scores, reflecting strong generalization[cite: 216]. The smooth asymptote proves that our fusion strategy does not merely overfit to the dominant modality (text) but genuinely learns the semantic alignment threshold required for visually complex test data.</p>
+                    <p>While attention-based models show rapid early memorization, they tend to oscillate heavily on validation sets containing hyperbolic user reviews. <strong>Vis 2</strong> tracks the validation AUC over training epochs. Evidential fusion stabilizes efficiently around epoch 10 and maintains superior AUC scores, reflecting strong generalization[cite: 216]. The smooth asymptote proves that our fusion strategy does not merely overfit to the dominant modality (text) but genuinely learns the semantic alignment threshold required for visually complex test data.</p>
                 </div>
                 <div class="vis-image">
                     <img src="visualisations/vis2.png" alt="Validation Metrics AUC/F1" class="architecture-img" style="margin: 0;">
@@ -249,7 +249,7 @@ def get_optimal_frame(review_emb, frame_embs):
             <div class="vis-container">
                 <div class="vis-text">
                     <h3>Comprehensive Ranking Benchmarks</h3>
-                    [cite_start]<p>Figure 2(b) summarizes the final performance using key ranking metrics (F1, MAP, NDCG)[cite: 218]. [cite_start]<strong>Vis 3</strong> clearly illustrates that while simple concatenation might occasionally spike in raw AUC, evidential fusion delivers the most balanced and consistent results across all ranking metrics[cite: 219]. [cite_start]It achieves a Mean Average Precision (MAP) of 0.87 and an NDCG of 0.97[cite: 16]. [cite_start]This balance is the hallmark of a robust review ranking algorithm, affirming its suitability for deployment in complex visual domains[cite: 219].</p>
+                    <p>Figure 2(b) summarizes the final performance using key ranking metrics (F1, MAP, NDCG)[cite: 218]. <strong>Vis 3</strong> clearly illustrates that while simple concatenation might occasionally spike in raw AUC, evidential fusion delivers the most balanced and consistent results across all ranking metrics[cite: 219]. It achieves a Mean Average Precision (MAP) of 0.87 and an NDCG of 0.97[cite: 16]. This balance is the hallmark of a robust review ranking algorithm, affirming its suitability for deployment in complex visual domains[cite: 219].</p>
                 </div>
                 <div class="vis-image">
                     <img src="visualisations/vis3.png" alt="Final Metric Summary Bar Chart" class="architecture-img" style="margin: 0;">
@@ -260,7 +260,7 @@ def get_optimal_frame(review_emb, frame_embs):
             <div class="vis-container reverse">
                 <div class="vis-text">
                     <h3>Cross-Genre Robustness & Modality Bias</h3>
-                    <p>The true test of a multimodal architecture is its adaptability across different data distributions. <strong>Vis 4</strong> breaks down performance across diverse film genres. [cite_start]Evidential fusion performed best on semantically dense films (e.g., <em>Interstellar</em>, <em>Fellowship of the Ring</em>)[cite: 200, 205]. [cite_start]In contrast, attention-based fusion excelled in dialogue-heavy narratives (<em>The Godfather</em>) [cite: 200][cite_start], and simple concatenation yielded solid results for visually grounded, direct films like <em>The Dark Knight</em>[cite: 201]. [cite_start]This underscores a fundamental takeaway: fusion strategies must be tailored to the semantic density of the content[cite: 202].</p>
+                    <p>The true test of a multimodal architecture is its adaptability across different data distributions. <strong>Vis 4</strong> breaks down performance across diverse film genres. Evidential fusion performed best on semantically dense films (e.g., <em>Interstellar</em>, <em>Fellowship of the Ring</em>)[cite: 200, 205]. In contrast, attention-based fusion excelled in dialogue-heavy narratives (<em>The Godfather</em>) [cite: 200], and simple concatenation yielded solid results for visually grounded, direct films like <em>The Dark Knight</em>[cite: 201]. This underscores a fundamental takeaway: fusion strategies must be tailored to the semantic density of the content[cite: 202].</p>
                 </div>
                 <div class="vis-image">
                     <img src="visualisations/vis4.png" alt="Performance Across Movie Genres" class="architecture-img" style="margin: 0;">
@@ -271,8 +271,41 @@ def get_optimal_frame(review_emb, frame_embs):
 
        
 
+<section data-aos="fade-up" style="margin-bottom: 4rem;">
+            <h2>8. References & Further Reading</h2>
+            <p>For a deeper dive into the foundational architectures and theories that power this framework, explore the primary literature below:</p>
+            
+            <ul style="list-style-type: none; padding-left: 0;">
+                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
+                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
+                    <strong>CLIP (Semantic Alignment):</strong> Radford, A., et al. (2021). <em>Learning Transferable Visual Models From Natural Language Supervision.</em> In Proceedings of the International Conference on Machine Learning (ICML).
+                </li>
+                
+                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
+                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
+                    <strong>Evidential Fusion (Dempster-Shafer):</strong> Alzahem, A., et al. (2024). <em>Feature fusion for improved classification: Combining Dempster-Shafer theory and multiple CNN architectures.</em> arXiv preprint arXiv:2405.20230.
+                </li>
+                
+                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
+                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
+                    <strong>BERT (Text Encoding):</strong> Devlin, J., et al. (2019). <em>BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.</em> In Proceedings of NAACL-HLT.
+                </li>
+
+                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
+                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
+                    <strong>ViT (Visual Encoding):</strong> Dosovitskiy, A., et al. (2021). <em>An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.</em> In Proceedings of ICLR.
+                </li>
+                
+                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
+                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
+                    <strong>Baseline Multimodal Approach (MCR):</strong> Liu, J., et al. (2021). <em>Multi-perspective Coherent Reasoning for Helpfulness Prediction of Multimodal Reviews.</em> In Proceedings of the ACL.
+                </li>
+            </ul>
+        </section>
+
     </main>
 
+        
     <footer>
         <div class="container">
             <strong>Muhammad Hamza</strong><br>
