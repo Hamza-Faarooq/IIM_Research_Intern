@@ -230,7 +230,7 @@ def get_optimal_frame(review_emb, frame_embs):
                     [cite_start]<p>Figure 2(a) illustrates the epoch-wise training loss[cite: 214]. Modern multimodal models often suffer from unstable gradients during early epochs due to modality conflict. [cite_start]As seen in <strong>Vis 1</strong>, evidential fusion demonstrates significantly smoother convergence and lower loss variance compared to the erratic trends observed in attention-based fusion[cite: 215]. By mathematically discounting conflicting modality signals via the Dempster-Shafer conflict mass ($K$), the network avoids steep gradient cliffs. [cite_start]This low-variance optimization highlights the inherent robustness in belief-theoretic weighting[cite: 217].</p>
                 </div>
                 <div class="vis-image">
-                    <img src="https://raw.githubusercontent.com/Hamza-Faarooq/IIM_Research_Intern/blob/main/visualisations/vis1.png" alt="Training Loss Dynamics" class="architecture-img" style="margin: 0;">
+                    <img src="visualisations/vis1.png" alt="Training Loss Dynamics" class="architecture-img" style="margin: 0;">
                     <div class="math-caption">Vis 1: Epoch-wise Training Loss Analysis</div>
                 </div>
             </div>
@@ -241,7 +241,7 @@ def get_optimal_frame(review_emb, frame_embs):
                     <p>While attention-based models show rapid early memorization, they tend to oscillate heavily on validation sets containing hyperbolic user reviews. <strong>Vis 2</strong> tracks the validation AUC over training epochs. [cite_start]Evidential fusion stabilizes efficiently around epoch 10 and maintains superior AUC scores, reflecting strong generalization[cite: 216]. The smooth asymptote proves that our fusion strategy does not merely overfit to the dominant modality (text) but genuinely learns the semantic alignment threshold required for visually complex test data.</p>
                 </div>
                 <div class="vis-image">
-                    <img src="https://raw.githubusercontent.com/Hamza-Faarooq/IIM_Research_Intern/blob/main/visualisations/vis2.png" alt="Validation Metrics AUC/F1" class="architecture-img" style="margin: 0;">
+                    <img src="visualisations/vis2.png" alt="Validation Metrics AUC/F1" class="architecture-img" style="margin: 0;">
                     <div class="math-caption">Vis 2: Validation AUC over Training Epochs</div>
                 </div>
             </div>
@@ -252,7 +252,7 @@ def get_optimal_frame(review_emb, frame_embs):
                     [cite_start]<p>Figure 2(b) summarizes the final performance using key ranking metrics (F1, MAP, NDCG)[cite: 218]. [cite_start]<strong>Vis 3</strong> clearly illustrates that while simple concatenation might occasionally spike in raw AUC, evidential fusion delivers the most balanced and consistent results across all ranking metrics[cite: 219]. [cite_start]It achieves a Mean Average Precision (MAP) of 0.87 and an NDCG of 0.97[cite: 16]. [cite_start]This balance is the hallmark of a robust review ranking algorithm, affirming its suitability for deployment in complex visual domains[cite: 219].</p>
                 </div>
                 <div class="vis-image">
-                    <img src="https://raw.githubusercontent.com/Hamza-Faarooq/IIM_Research_Intern/blob/main/visualisations/vis3.png" alt="Final Metric Summary Bar Chart" class="architecture-img" style="margin: 0;">
+                    <img src="visualisations/vis3.png" alt="Final Metric Summary Bar Chart" class="architecture-img" style="margin: 0;">
                     <div class="math-caption">Vis 3: Final Metric Evaluation Summary</div>
                 </div>
             </div>
@@ -263,7 +263,7 @@ def get_optimal_frame(review_emb, frame_embs):
                     <p>The true test of a multimodal architecture is its adaptability across different data distributions. <strong>Vis 4</strong> breaks down performance across diverse film genres. [cite_start]Evidential fusion performed best on semantically dense films (e.g., <em>Interstellar</em>, <em>Fellowship of the Ring</em>)[cite: 200, 205]. [cite_start]In contrast, attention-based fusion excelled in dialogue-heavy narratives (<em>The Godfather</em>) [cite: 200][cite_start], and simple concatenation yielded solid results for visually grounded, direct films like <em>The Dark Knight</em>[cite: 201]. [cite_start]This underscores a fundamental takeaway: fusion strategies must be tailored to the semantic density of the content[cite: 202].</p>
                 </div>
                 <div class="vis-image">
-                    <img src="https://raw.githubusercontent.com/Hamza-Faarooq/IIM_Research_Intern/blob/main/visualisations/vis4.png" alt="Performance Across Movie Genres" class="architecture-img" style="margin: 0;">
+                    <img src="visualisations/vis4.png" alt="Performance Across Movie Genres" class="architecture-img" style="margin: 0;">
                     <div class="math-caption">Vis 4: Performance Disaggregation by Cinematic Genre</div>
                 </div>
             </div>
