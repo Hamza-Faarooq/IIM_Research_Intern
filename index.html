@@ -44,8 +44,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); line-height: 1.8; font-size: 1.15rem; }
         h1, h2, h3, h4 { font-family: 'Lora', serif; color: var(--text-main); margin-bottom: 1rem; }
-        h2 { font-size: 2.2rem; margin-top: 3rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
-        p { margin-bottom: 1.5rem; color: var(--text-muted); }
+        h2 { font-size: 2.2rem; margin-top: 3.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+        p { margin-bottom: 1.5rem; color: var(--text-muted); text-align: justify; }
         a { color: var(--accent); text-decoration: none; font-weight: 500; }
         a:hover { text-decoration: underline; }
 
@@ -80,6 +80,9 @@
         .btn { padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border); background: var(--surface); color: var(--text-main); transition: all 0.2s; }
         .btn:hover { background: var(--accent); color: white; border-color: var(--accent); text-decoration: none; }
 
+        /* Citation Styling */
+        sup.citation { font-family: 'Inter', sans-serif; font-size: 0.75rem; color: var(--accent); font-weight: 600; cursor: pointer; }
+
         /* Footer */
         footer { margin-top: 5rem; padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); font-size: 0.9rem; color: var(--text-muted); }
     </style>
@@ -88,7 +91,7 @@
 
     <nav>
         <div class="container nav-inner">
-            <strong>M. Hamza</strong>
+            <strong>M. Hamza | ML Research</strong>
             <button onclick="toggleTheme()" style="background:none; border:none; color:var(--text-main); cursor:pointer; font-size:1.2rem;">
                 <i class="fas fa-moon"></i>
             </button>
@@ -102,7 +105,7 @@
             <strong>Muhammad Hamza</strong>, Krishna Rai, Sobhan Sarkar<br>
             <span style="font-size: 0.95rem;">IIT Kharagpur & IIM Ranchi</span>
         </div>
-        <p>A deep dive into how we taught neural networks to "watch" movies alongside human reviewers, dynamically aligning text with visual frames, and managing subjective ambiguity using Dempster-Shafer theory.</p>
+        <p>A deep dive into how we taught neural networks to "watch" movies alongside human reviewers, dynamically aligning text with visual frames, and mathematically resolving subjective ambiguity using Dempster-Shafer theory.</p>
         
         <div class="btn-group">
             <a href="https://github.com/Hamza-Faarooq/IIM_Research_Intern/blob/main/model_architecture/main_architecture.png" class="btn" target="_blank"><i class="fas fa-project-diagram"></i> Architecture</a>
@@ -117,37 +120,39 @@
             <div class="story-box">
                 Imagine reading a review for Christopher Nolan's <em>Interstellar</em>. The reviewer writes: "The sheer isolation of humanity was perfectly captured in that single, silent wide shot."
             </div>
-            <p>If you feed this review into a standard NLP model (like BERT), it understands the sentiment. But it has a critical blind spot: <strong>it cannot see the shot.</strong></p>
-            <p>This is known as the <strong>Semantic Gap</strong>. Traditional multimodal models try to fix this by blindly pairing the review text with a generic movie poster. But when a reviewer talks about a specific cinematic moment—lighting, camera angles, or a symbolic frame—a generic image adds noise, not context. We needed a model that could dynamically search through a movie and find the exact frame the reviewer was talking about.</p>
+            <p>If you feed this review into a standard Natural Language Processing (NLP) model, it registers the positive sentiment but fundamentally misses the context. [cite_start]This is what we define as the semantic gap in high-context domains like film critique<sup class="citation">[cite: 28]</sup>. [cite_start]Reviewers consistently reference complex visual elements—such as lighting, camera angles, or symbolic framing—that are entirely absent from the text itself<sup class="citation">[cite: 28, 71]</sup>. </p>
+            [cite_start]<p>Predicting review helpfulness is a critical challenge impacting both NLP and Recommender Systems (RS)<sup class="citation">[cite: 27]</sup>. [cite_start]In traditional Recommender Systems, platforms rely heavily on crowd-sourced "helpful" votes<sup class="citation">[cite: 23]</sup>. [cite_start]However, relying solely on user-voted helpfulness introduces severe noise and bias, frequently overlooking high-quality reviews simply due to low visibility or limited early feedback<sup class="citation">[cite: 23, 29]</sup>. [cite_start]Early multimodal frameworks, such as Multi-perspective Coherent Reasoning (MCR), attempted to integrate visual cues but operated on a flawed assumption: they assumed that a review's paired image is inherently aligned with its text<sup class="citation">[cite: 56, 70]</sup>. [cite_start]To build a robust multimodal solution, we realized we must overcome two foundational obstacles: explicit Visual-Textual Semantic Grounding (dynamically linking abstract review text to actual movie frames) and Uncertainty Management (handling the inherent noise of user-generated content and conflicting modality signals)<sup class="citation">[cite: 30]</sup>.</p>
         </section>
 
         <section data-aos="fade-up">
             <h2>2. Visual Grounding via CLIP</h2>
-            <p>To give our model "eyes," we extracted thousands of keyframes from movies. Instead of hardcoding image-text pairs, we projected both the user's review and the candidate movie frames into a shared multimodal latent space using OpenAI's <strong>CLIP</strong> (Contrastive Language-Image Pretraining).</p>
-            <p>The model computes the cosine similarity between the text embedding $e_r$ and every frame embedding $e_f$, selecting the frame $f^*$ that maximizes this alignment:</p>
+            [cite_start]<p>To eliminate the assumption of inherent multimodal correspondence, we proposed a semantic alignment module utilizing the joint vision-language space of Contrastive Language-Image Pre-training (CLIP)<sup class="citation">[cite: 14, 78]</sup>. [cite_start]We extracted approximately 24,000 keyframes across our dataset and projected both the user's text and candidate movie stills into a shared latent dimensional space<sup class="citation">[cite: 106]</sup>. Instead of arbitrary pairings, the model actively searches for the frame that best grounds the text's abstract references.</p>
+            [cite_start]<p>The semantic alignment score between a review $r_i$ and a candidate frame $f_j$ is computed using the cosine similarity between their respective CLIP embeddings<sup class="citation">[cite: 143]</sup>. We select the most relevant frame $f^*$ by maximizing this similarity function:</p>
             
             <div class="math-block">
-                $$ f^* = \arg\max_{f} \cos(\text{CLIP}_{text}(r), \text{CLIP}_{image}(f)) $$
+                $$ align(r_i, f_j) = \cos(CLIP_{text}(r_i), CLIP_{image}(f_j)) $$
+                <br>
+                $$ f^* = \arg\max_{f} \cos(e_r, e_f) $$
             </div>
 
-            <p>Here is a simplified PyTorch snippet demonstrating how we score and select the optimal frame dynamically during the data pipeline, similar to the logic in our Jupyter notebooks:</p>
+            [cite_start]<p>To address potential bias introduced by CLIP-based pseudo-labeling, we manually validated a subset of 500 review-image pairs and optimized the similarity threshold<sup class="citation">[cite: 145]</sup>. [cite_start]We empirically determined a helpfulness threshold of $0.54$, derived from IMDb vote ratios<sup class="citation">[cite: 107, 117]</sup>. [cite_start]This precise threshold balances class distribution while ensuring semantic relevance, as higher thresholds severely unbalanced the classes and reduced dataset size<sup class="citation">[cite: 118, 120]</sup>. Here is how this dynamic frame selection operates in PyTorch:</p>
 
 <pre><code class="language-python">import torch
 import torch.nn.functional as F
 
 def get_optimal_frame(review_emb, frame_embs):
     """
-    review_emb: Tensor of shape (1, 512) from CLIP text encoder
-    frame_embs: Tensor of shape (N, 512) from CLIP image encoder (N frames)
+    review_emb: Tensor (1, 512) from CLIP text encoder
+    frame_embs: Tensor (N, 512) from CLIP image encoder (N keyframes)
     """
-    # Normalize embeddings for cosine similarity
+    # Normalize embeddings for cosine similarity computation
     review_emb = F.normalize(review_emb, p=2, dim=-1)
     frame_embs = F.normalize(frame_embs, p=2, dim=-1)
     
     # Compute similarity scores across all candidate frames
-    similarity_scores = torch.matmul(review_emb, frame_embs.T) # Shape: (1, N)
+    similarity_scores = torch.matmul(review_emb, frame_embs.T)
     
-    # Select the frame with the highest semantic alignment
+    # Select the frame f* that maximizes semantic alignment
     best_frame_idx = torch.argmax(similarity_scores, dim=-1)
     alignment_score = similarity_scores[0, best_frame_idx]
     
@@ -156,18 +161,20 @@ def get_optimal_frame(review_emb, frame_embs):
         </section>
 
         <section data-aos="fade-up">
-            <h2>3. The Architecture</h2>
-            <p>Once we have the optimally aligned frame and the review text, we need deep feature extraction. We utilize <strong>BERT-base</strong> (768-dim) for text and <strong>Vision Transformer (ViT-Base/16)</strong> for the selected image. But the real magic happens in the fusion layer.</p>
+            <h2>3. Architectural Feature Extraction</h2>
+            [cite_start]<p>With the optimally aligned frame and text acquired, we process a curated dataset of 40,000 IMDb user reviews, meticulously cleaned to retain deep semantic content<sup class="citation">[cite: 105]</sup>. [cite_start]Our framework integrates advanced deep learning techniques, leveraging distinct state-of-the-art transformer encoders for independent modality extraction before fusion<sup class="citation">[cite: 88, 100]</sup>.</p>
+            [cite_start]<p>The textual analysis component utilizes Bidirectional Encoder Representations from Transformers (BERT) for profound contextual review encoding<sup class="citation">[cite: 14, 121]</sup>. [cite_start]For each review $r_i$, the BERT encoder maps the sequence into a $d_{bert}$-dimensional real-valued vector space, resulting in $h_{text} \in \mathbb{R}^{768}$<sup class="citation">[cite: 125, 127, 130]</sup>. [cite_start]Simultaneously, the visual analysis employs a Vision Transformer (ViT) architecture to extract high-level semantic representations from the chosen movie scene, producing $h_{visual} \in \mathbb{R}^{768}$ for the selected frame $f^*$<sup class="citation">[cite: 131, 133, 135]</sup>.</p>
             
             <img src="https://raw.githubusercontent.com/Hamza-Faarooq/IIM_Research_Intern/main/model_architecture/main_architecture.png" alt="Model Architecture" class="architecture-img">
-            <p style="text-align: center; font-size: 0.9rem;"><em>Fig 1: The complete multimodal pipeline, from keyframe extraction to Evidential Fusion.</em></p>
+            <p style="text-align: center; font-size: 0.9rem;"><em>Fig 1: The complete multimodal pipeline. Text reviews are encoded using BERT, while keyframes are processed via ViT, guided by CLIP alignment.</em></p>
+
+            [cite_start]<p>The network utilizes two task-specific heads: a binary or regression output for helpfulness prediction and a binary classifier for semantic alignment<sup class="citation">[cite: 179, 180]</sup>. [cite_start]Both heads share the fused representation and are optimized jointly using a multi-task loss formulation: $\mathcal{L} = \lambda_1 \cdot \mathcal{L}_{help} + \lambda_2 \cdot \mathcal{L}_{align}$<sup class="citation">[cite: 181, 182]</sup>. [cite_start]We optimize the network using the Adam optimizer with a learning rate of 3e-5 and a batch size of 16, leveraging its adaptive update mechanism for stable convergence<sup class="citation">[cite: 185]</sup>.</p>
         </section>
 
         <section data-aos="fade-up">
             <h2>4. Mathematical Rigor: Evidential Fusion</h2>
-            <p>Most modern architectures use <em>Deterministic Fusion</em> (like concatenation or simple attention). They just smash the text and image vectors together: <code>[text_emb ; img_emb]</code>. </p>
-            <p>But human reviews are noisy. Sometimes the image and text agree perfectly. Sometimes the text is sarcastic, and the visual contradicts it. If we use simple concatenation, the model becomes overconfident and fails.</p>
-            <p>To solve this, we implemented <strong>Evidential Fusion</strong> inspired by <strong>Dempster-Shafer theory</strong>. We treat the text and visual neural networks as two independent "detectives." Each detective outputs a <em>belief mass</em> $m$. If their beliefs conflict, we quantify that conflict as $K$ and discount it from the final prediction.</p>
+            [cite_start]<p>Modern multimodal review models frequently employ deterministic fusion strategies, such as simple concatenation, element-wise addition, or fixed attention mechanisms<sup class="citation">[cite: 73]</sup>. [cite_start]These shallow deterministic methods possess a critical flaw: they overlook modality-level uncertainty<sup class="citation">[cite: 74]</sup>. [cite_start]In user-generated content, reviewers are frequently hyperbolic, and visuals may be abstract or ambiguous<sup class="citation">[cite: 74]</sup>. [cite_start]Deterministic models risk overfitting to one modality, forcing overconfident predictions even when inputs aggressively contradict one another<sup class="citation">[cite: 75]</sup>.</p>
+            [cite_start]<p>To move beyond these limitations, we engineered an uncertainty-aware fusion framework grounded in Dempster-Shafer theory<sup class="citation">[cite: 80, 174]</sup>. [cite_start]This belief-theoretic strategy interprets the extracted textual and visual embeddings as distinct "opinions" or belief masses<sup class="citation">[cite: 159, 172]</sup>. [cite_start]When the textual and visual cues agree, the belief mass is structurally reinforced; however, when the modalities conflict, the framework explicitly quantifies this disagreement as conflict mass $K$<sup class="citation">[cite: 166, 173]</sup>.</p>
 
             <div class="math-block">
                 $$ K = \sum_{i \neq j} m_1(i) \cdot m_2(j) $$
@@ -175,25 +182,22 @@ def get_optimal_frame(review_emb, frame_embs):
                 $$ m_{fused} = \frac{m_1 \cdot m_2}{1 - K} $$
             </div>
 
-            <p>By dividing by $(1 - K)$, the network mathematically penalizes high-conflict situations, allowing it to gracefully handle ambiguous reviews rather than making blind guesses. Here is how that translates to PyTorch:</p>
+            [cite_start]<p>In these equations, $K$ quantifies the total conflict by summing over all distinct hypothesis pairs where $i \neq j$<sup class="citation">[cite: 167, 171]</sup>. [cite_start]The fused belief mass $m_{fused}$ is then computed using orthogonal combination rules<sup class="citation">[cite: 160, 164]</sup>. [cite_start]By dividing by $(1 - K)$, the architecture adaptively weights the modalities based on confidence, yielding exceptionally robust predictions under noisy or ambiguous conditions<sup class="citation">[cite: 81, 173]</sup>.</p>
 
 <pre><code class="language-python">class EvidentialFusionLayer(torch.nn.Module):
     def __init__(self):
         super().__init__()
         
     def forward(self, mass_text, mass_visual):
-        # mass_text, mass_visual: (Batch, Classes) - Probabilities/Beliefs
-        
-        # Calculate agreement (element-wise multiplication)
+        # Calculate agreement (element-wise multiplication of beliefs)
         joint_mass = mass_text * mass_visual 
         
-        # Calculate conflict K: sum of all non-matching class multiplications
-        # For binary classification (Helpful vs Unhelpful), K is the cross terms
+        # Calculate conflict K: sum of non-matching hypothesis multiplications
         K = (mass_text[:, 0] * mass_visual[:, 1]) + (mass_text[:, 1] * mass_visual[:, 0])
-        K = K.unsqueeze(-1) # Reshape for broadcasting
+        K = K.unsqueeze(-1) 
         
         # Dempster's Rule of Combination: Normalize by (1 - K)
-        # Add epsilon (1e-8) for numerical stability to prevent div by zero
+        # 1e-8 added for numerical stability
         m_fused = joint_mass / (1 - K + 1e-8)
         
         return m_fused
@@ -201,16 +205,15 @@ def get_optimal_frame(review_emb, frame_embs):
         </section>
 
         <section data-aos="fade-up">
-            <h2>5. Results: Why Context Matters</h2>
-            <p>We trained and evaluated this architecture on over 40,000+ review-image pairs across 9 diverse movies. Our Evidential Fusion achieved state-of-the-art ranking performance with a <strong>Mean Average Precision (MAP) of 0.87</strong> and <strong>NDCG of 0.97</strong>.</p>
-            
-            <p>But the most interesting finding was <em>where</em> the model excelled. In visually complex, abstract films like <em>Interstellar</em> and <em>Fellowship of the Ring</em>, Evidential Fusion crushed the baselines. Why? Because abstract movies generate highly subjective, conflicting reviews, making Dempster-Shafer's uncertainty modeling critical. Conversely, for dialogue-heavy films like <em>The Godfather</em>, standard attention mechanisms performed adequately.</p>
+            <h2>5. Empirical Results & Ablation</h2>
+            [cite_start]<p>To rigorously evaluate the framework, we conducted a comprehensive set of experiments across nine diverse movies, encompassing genres such as sci-fi (Interstellar), drama (Shawshank Redemption), and crime (The Godfather)<sup class="citation">[cite: 191, 195]</sup>. [cite_start]Evidential fusion achieved state-of-the-art ranking performance with a Mean Average Precision (MAP) of $0.87$ and a Normalized Discounted Cumulative Gain (NDCG) of $0.97$<sup class="citation">[cite: 16]</sup>.</p>
+            <p>Crucially, model behavior varied significantly based on narrative style. [cite_start]In visually dense and abstract films like <em>Interstellar</em> and <em>Fellowship of the Ring</em>, Evidential Fusion vastly outperformed baselines (e.g., MAP: $0.90$, F1: $0.80$ for Interstellar) because of its mathematical strength in managing modality uncertainty and aligning abstract text with symbolic visuals<sup class="citation">[cite: 204, 205]</sup>. [cite_start]Conversely, for text-heavy, dialogue-driven narratives like <em>The Godfather</em>, attention-based fusion yielded the highest accuracy<sup class="citation">[cite: 200, 210]</sup>. [cite_start]Action-centric films with clear visual-text alignments, like <em>The Dark Knight</em>, responded well to simple concatenation<sup class="citation">[cite: 212]</sup>.</p>
 
             <div style="background: var(--surface); padding: 1rem; border-radius: 8px; margin: 2rem 0; border: 1px solid var(--border);">
                 <canvas id="resultsChart" height="250"></canvas>
             </div>
             
-            <p><strong>Ablation Study:</strong> We proved the necessity of our components. Removing the CLIP-based semantic alignment caused a 4% drop in F1-score. Dropping 20% of visual data caused only a 2.7% performance drop in our model, compared to a 5.2% crash in traditional concatenation models, proving the robustness of evidential reasoning.</p>
+            <p>We executed rigorous ablation studies to isolate component impacts. [cite_start]Removing CLIP-based semantic alignment drastically reduced the F1-score by 4%<sup class="citation">[cite: 228, 229]</sup>. To test robustness, we conducted leave-one-out validation where 20% of the visual data was deliberately dropped. [cite_start]Under this corruption, evidential fusion's performance declined by a mere 2.7%, whereas baseline multimodal methods suffered a 5.2% decay<sup class="citation">[cite: 225, 226]</sup>. [cite_start]Finally, paired t-tests aggregated across all 9 movies proved that Evidential Fusion's improvements are consistently statistically significant ($p < 0.05$) compared to attention fusion across F1, MAP, and NDCG metrics<sup class="citation">[cite: 230, 231, 243]</sup>.</p>
         </section>
 
     </main>
