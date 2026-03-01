@@ -532,15 +532,15 @@ Where alignment loss enforces semantic consistency and helpfulness loss is binar
 
 
 
-        <section data-aos="fade-up">
+      <section data-aos="fade-up">
 <h2>6. Comprehensive Empirical Evaluation & Cross-Genre Analysis</h2>
 
 <p>
-We evaluated three fusion paradigms: simple concatenation, attention-based fusion, and evidential fusion. Performance was assessed across Accuracy, F1, AUC, MAP, and NDCG — ensuring both classification and ranking robustness were measured.
+We evaluated three fusion paradigms: simple concatenation, attention-based fusion, and evidential fusion. Performance was assessed across classification metrics (Accuracy, F1, AUC) and ranking metrics (MAP, NDCG@5), ensuring both discriminative power and ranking robustness were measured.
 </p>
 
 <p>
-While AUC measures discrimination ability,
+Area Under the ROC Curve (AUC) measures ranking separability:
 </p>
 
 <div class="math-block">
@@ -549,12 +549,12 @@ While AUC measures discrimination ability,
 P(\hat{y}_{pos} > \hat{y}_{neg})
 \]
 <div class="math-caption">
-Probability that a randomly chosen helpful review is ranked above a non-helpful one.
+Probability that a randomly selected helpful review is ranked above a non-helpful one.
 </div>
 </div>
 
 <p>
-ranking metrics such as NDCG evaluate positional quality:
+Ranking quality is further captured using NDCG:
 </p>
 
 <div class="math-block">
@@ -562,34 +562,14 @@ ranking metrics such as NDCG evaluate positional quality:
 \text{NDCG@k} =
 \frac{DCG@k}{IDCG@k}
 \]
+<div class="math-caption">
+Normalized Discounted Cumulative Gain evaluates top-ranked prediction quality.
+</div>
 </div>
 
 <p>
-Evidential fusion consistently improved MAP and NDCG in semantically abstract films (e.g., Interstellar, Return of the King). These domains contain high symbolic density and visual fragmentation. Deterministic fusion methods tended to overfit dominant modalities.
+Empirical results demonstrate that evidential fusion consistently improves MAP and NDCG in semantically abstract films such as <em>Interstellar</em> and <em>Return of the King</em>, where visual symbolism and metaphor density are high. In contrast, attention-based fusion performs strongly in dialogue-heavy narratives such as <em>The Godfather</em>, where textual dominance reduces modality conflict.
 </p>
-
-<p>
-Interestingly, attention-based fusion excelled in dialogue-heavy narratives (e.g., The Godfather). This suggests that modality weighting is domain-sensitive.
-</p>
-
-<p>
-Key empirical insight:
-</p>
-
-<div class="math-block">
-\[
-\text{Performance Gain}
-\approx
-\text{Alignment Contribution}
-+
-\text{Uncertainty Stabilization}
-\]
-</div>
-
-<p>
-Alignment accounts for major gains, while evidential modeling improves stability under modality conflict.
-</p>
-
 
 <!-- ===================================================== -->
 <!-- FULL BENCHMARK TABLE -->
@@ -633,7 +613,7 @@ Alignment accounts for major gains, while evidential modeling improves stability
 <td>Attention (0.97)</td>
 </tr>
 <tr>
-<td>Godfather-1</td>
+<td>Godfather</td>
 <td>Simple (0.68)</td>
 <td>Attention (0.80)</td>
 <td><span class="best-metric">Evidential (0.81)</span></td>
@@ -675,10 +655,27 @@ Alignment accounts for major gains, while evidential modeling improves stability
 </tbody>
 </table>
 <div class="math-caption">
-Complete cross-genre comparison of fusion strategies.
+Complete cross-genre comparison of multimodal fusion strategies.
 </div>
 </div>
 
+<p>
+The dominant trend across genres suggests:
+</p>
+
+<div class="math-block">
+\[
+\text{Performance Gain}
+\approx
+\text{Alignment Strength}
++
+\text{Uncertainty Stabilization}
+\]
+</div>
+
+<p>
+Alignment contributes the majority of raw accuracy improvements, while evidential fusion enhances robustness under modality disagreement.
+</p>
 
 <!-- ===================================================== -->
 <!-- TRAINING DYNAMICS GRAPH -->
@@ -689,8 +686,12 @@ Complete cross-genre comparison of fusion strategies.
 </div>
 
 <script>
+if (!window.trainingChartInitialized) {
+window.trainingChartInitialized = true;
+
 const ctx = document.getElementById('trainingChart').getContext('2d');
-const trainChart = new Chart(ctx, {
+
+new Chart(ctx, {
 type: 'line',
 data: {
 labels: ['Epoch 1','Epoch 3','Epoch 5','Epoch 7','Epoch 10','Epoch 12','Epoch 15'],
@@ -728,74 +729,66 @@ title: { display: true, text: 'Validation AUC' }
 }
 }
 });
+}
 </script>
 
-     <p> We evaluated our model using classification (Accuracy, F1,
-AUC) and ranking metrics (MAP, NDCG@5). As shown in
-Table II, evidential fusion performed best on semantically
-dense films (e.g., Interstellar), while attention-based fusion
-excelled in dialogue-heavy narratives (The Godfather). Simple
-concatenation also yielded solid results for visually grounded
-films like The Dark Knight. These results underscore the value
-of tailoring fusion strategies to genre and content type.
-As shown in Table II, Evidential fusion performs consistently well, especially in visually complex films. In Interstellar,
-it outperforms all baselines (e.g., F1: 0.80, MAP: 0.90), likely
-due to its strength in managing modality uncertainty and
-aligning abstract text with symbolic visuals via the Dempster Shafer framework.
-For Fellowship of the Ring, Evidential Fusion outperformed
-others across most metrics, showcasing its strength in abstract, visually dense content. In contrast, Godfather and Shawshank
-Redemption, being text-heavy, favored Attentio and Simple
-fusion, with top MAP and accuracy scores, respectively. The
-Two Towers and Inception, with fragmented visuals, saw
-Evidential Fusion excel in AUC, MAP, and NDCG due to its
-uncertainty modeling. For action-centric films like The Dark
-Knight and Batman Begins, Simple fusion performed best,
-likely due to clear and direct visual-text alignments.
-     </p>        
+<!-- ===================================================== -->
+<!-- VISUAL DIAGNOSTICS -->
+<!-- ===================================================== -->
+
 <div class="vis-container">
-                <div class="vis-text">
-                    <h3>Optimization & Convergence Stability</h3>
-                    <p>Figure 2(a) illustrates the epoch-wise training loss. Modern multimodal models often suffer from unstable gradients during early epochs due to modality conflict. As seen in <strong>Vis 1</strong>, evidential fusion demonstrates significantly smoother convergence and lower loss variance compared to the erratic trends observed in attention-based fusion. By mathematically discounting conflicting modality signals via the Dempster-Shafer conflict mass ($K$), the network avoids steep gradient cliffs. This low-variance optimization highlights the inherent robustness in belief-theoretic weighting.</p>
-                </div>
-                <div class="vis-image">
-                    <img src="visualisations/vis1.png" alt="Training Loss Dynamics" class="architecture-img" style="margin: 0;">
-                    <div class="math-caption">Vis 1: Epoch-wise Training Loss Analysis</div>
-                </div>
-            </div>
+<div class="vis-text">
+<h3>Optimization & Convergence Stability</h3>
+<p>
+Evidential fusion demonstrates smoother convergence and reduced gradient variance. By normalizing conflict mass \(K\), the Dempster–Shafer framework mitigates abrupt gradient fluctuations observed in attention-based fusion.
+</p>
+</div>
+<div class="vis-image">
+<img src="visualisations/vis1.png" alt="Training Loss Dynamics" class="architecture-img">
+<div class="math-caption">Vis 1: Training Loss Dynamics</div>
+</div>
+</div>
 
-            <div class="vis-container reverse">
-                <div class="vis-text">
-                    <h3>Validation Generalization (AUC & F1)</h3>
-                    <p>While attention-based models show rapid early memorization, they tend to oscillate heavily on validation sets containing hyperbolic user reviews. <strong>Vis 2</strong> tracks the validation AUC over training epochs. Evidential fusion stabilizes efficiently around epoch 10 and maintains superior AUC scores, reflecting strong generalization. The smooth asymptote proves that our fusion strategy does not merely overfit to the dominant modality (text) but genuinely learns the semantic alignment threshold required for visually complex test data.</p>
-                </div>
-                <div class="vis-image">
-                    <img src="visualisations/vis2.png" alt="Validation Metrics AUC/F1" class="architecture-img" style="margin: 0;">
-                    <div class="math-caption">Vis 2: Validation AUC over Training Epochs</div>
-                </div>
-            </div>
+<div class="vis-container reverse">
+<div class="vis-text">
+<h3>Validation Generalization</h3>
+<p>
+Attention-based fusion exhibits oscillatory validation behavior under modality disagreement, while evidential fusion stabilizes after epoch 10, indicating stronger generalization.
+</p>
+</div>
+<div class="vis-image">
+<img src="visualisations/vis2.png" alt="Validation Metrics" class="architecture-img">
+<div class="math-caption">Vis 2: Validation AUC Stability</div>
+</div>
+</div>
 
-            <div class="vis-container">
-                <div class="vis-text">
-                    <h3>Comprehensive Ranking Benchmarks</h3>
-                    <p>Figure 2(b) summarizes the final performance using key ranking metrics (F1, MAP, NDCG). <strong>Vis 3</strong> clearly illustrates that while simple concatenation might occasionally spike in raw AUC, evidential fusion delivers the most balanced and consistent results across all ranking metrics. It achieves an aggregate MAP of 0.87 and an NDCG of 0.97. This balance is the hallmark of a robust review ranking algorithm, affirming its suitability for deployment in complex visual domains.</p>
-                </div>
-                <div class="vis-image">
-                    <img src="visualisations/vis3.png" alt="Final Metric Summary Bar Chart" class="architecture-img" style="margin: 0;">
-                    <div class="math-caption">Vis 3: Final Metric Evaluation Summary</div>
-                </div>
-            </div>
+<div class="vis-container">
+<div class="vis-text">
+<h3>Ranking Metric Consistency</h3>
+<p>
+Evidential fusion achieves balanced improvements across F1, MAP, and NDCG, demonstrating superior ranking robustness rather than isolated metric spikes.
+</p>
+</div>
+<div class="vis-image">
+<img src="visualisations/vis3.png" alt="Ranking Summary" class="architecture-img">
+<div class="math-caption">Vis 3: Final Metric Comparison</div>
+</div>
+</div>
 
-            <div class="vis-container reverse">
-                <div class="vis-text">
-                    <h3>Cross-Genre Robustness & Modality Bias</h3>
-                    <p>The true test of a multimodal architecture is its adaptability across different data distributions. <strong>Vis 4</strong> reinforces the insights from Table II. Evidential fusion performed exceptionally on visually fragmented films (e.g., <em>Interstellar</em>). The variance between methods underscores a fundamental takeaway: <em>there is no "one size fits all" multimodal fusion.</em> Fusion strategies must be dynamically tailored or weighted according to the semantic and visual density of the source media.</p>
-                </div>
-                <div class="vis-image">
-                    <img src="visualisations/vis4.png" alt="Performance Across Movie Genres" class="architecture-img" style="margin: 0;">
-                    <div class="math-caption">Vis 4: Performance Disaggregation by Cinematic Genre</div>
-                </div>
-            </div>
-        </section>
+<div class="vis-container reverse">
+<div class="vis-text">
+<h3>Cross-Genre Robustness</h3>
+<p>
+Performance variation across narrative types confirms that multimodal fusion is domain-sensitive. Evidential modeling performs best in visually fragmented or symbolically dense films.
+</p>
+</div>
+<div class="vis-image">
+<img src="visualisations/vis4.png" alt="Genre Performance" class="architecture-img">
+<div class="math-caption">Vis 4: Genre-Level Performance</div>
+</div>
+</div>
+
+</section>
 
         <section data-aos="fade-up">
 <h2>7. Ablation Study & Component Sensitivity</h2>
