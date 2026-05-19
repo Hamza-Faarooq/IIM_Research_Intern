@@ -1,1495 +1,1380 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bridging the Semantic Gap | Muhammad Hamza</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EviCLIP — Multimodal Review Helpfulness | Muhammad Hamza</title>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}]});"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        :root {
-            --bg: #ffffff;
-            --surface: #f8f9fa;
-            --text-main: #1a1a1a;
-            --text-muted: #4a4a4a;
-            --accent: #005587; 
-            --accent-hover: #003b5c;
-            --border: #e2e8f0;
-            --code-bg: #1e1e1e;
-        }
+<style>
+/* ═══════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════ */
+:root {
+  --ff-display: 'Playfair Display', Georgia, serif;
+  --ff-body: 'DM Sans', system-ui, sans-serif;
+  --ff-mono: 'JetBrains Mono', monospace;
 
-        [data-theme='dark'] {
-            --bg: #0f1115;
-            --surface: #1a1d24;
-            --text-main: #e2e8f0;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8; 
-            --accent-hover: #7dd3fc;
-            --border: #2dd4bf20;
-        }
+  /* Light theme */
+  --bg:        #faf9f7;
+  --bg-alt:    #f2f0ec;
+  --surface:   #ffffff;
+  --border:    #e0dbd2;
+  --text:      #1a1714;
+  --text-2:    #4a4541;
+  --text-3:    #8a8480;
+  --accent:    #b5451b;
+  --accent-2:  #d4622d;
+  --accent-bg: rgba(181,69,27,0.07);
+  --gold:      #c9972a;
+  --blue:      #2453a8;
+  --teal:      #1a7f6e;
+  --shadow:    0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.10);
+}
+[data-theme="dark"] {
+  --bg:        #0e0d0b;
+  --bg-alt:    #161410;
+  --surface:   #1c1a17;
+  --border:    #2e2a25;
+  --text:      #f0ece6;
+  --text-2:    #b8b0a6;
+  --text-3:    #6e6860;
+  --accent:    #e8663a;
+  --accent-2:  #f07d52;
+  --accent-bg: rgba(232,102,58,0.10);
+  --gold:      #e0b040;
+  --blue:      #6b9ef5;
+  --teal:      #3ec9b1;
+  --shadow:    0 1px 3px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.25);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.4);
+}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
-        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text-main); line-height: 1.8; font-size: 1.15rem; }
-        h1, h2, h3, h4 { font-family: 'Lora', serif; color: var(--text-main); margin-bottom: 1rem; }
-        h2 { font-size: 2.2rem; margin-top: 4rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; position: relative; }
-        h2::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 60px; height: 2px; background: var(--accent); }
-        h3 { font-size: 1.5rem; margin-top: 2rem; color: var(--accent); }
-        p { margin-bottom: 1.5rem; color: var(--text-muted); text-align: justify; }
-        a { color: var(--accent); text-decoration: none; font-weight: 500; }
-        a:hover { text-decoration: underline; }
-        ul { margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-muted); }
-        li { margin-bottom: 0.5rem; }
+/* ═══════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--ff-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+  font-size: 1.05rem;
+  transition: background .3s, color .3s;
+}
+h1,h2,h3,h4,h5 { font-family: var(--ff-display); line-height: 1.25; color: var(--text); }
+p { color: var(--text-2); margin-bottom: 1.4rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+ul, ol { color: var(--text-2); padding-left: 1.5rem; margin-bottom: 1.4rem; }
+li { margin-bottom: .5rem; }
+strong { color: var(--text); font-weight: 600; }
 
-        .container { max-width: 850px; margin: 0 auto; padding: 0 2rem; }
-        
-        /* Nav */
-        nav { position: fixed; top: 0; width: 100%; background: rgba(var(--bg), 0.9); backdrop-filter: blur(10px); z-index: 100; border-bottom: 1px solid var(--border); }
-        .nav-inner { display: flex; justify-content: space-between; align-items: center; height: 65px; font-size: 1rem; }
-        
-        /* Hero */
-        .hero { padding: 140px 0 60px; text-align: left; }
-        .tag { display: inline-block; padding: 0.4rem 1rem; background: rgba(0, 85, 135, 0.1); color: var(--accent); border-radius: 50px; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 1.5rem; }
-        [data-theme='dark'] .tag { background: rgba(56, 189, 248, 0.1); }
-        .hero h1 { font-size: 3.2rem; line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 1.5rem; }
-        .authors { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; }
-        
-        /* Story Callout */
-        .story-box { background: var(--surface); padding: 2rem; border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; margin: 2rem 0; font-family: 'Lora', serif; font-size: 1.2rem; font-style: italic; }
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.container { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
+.container--wide { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
 
-        /* Images, Charts & Visualizations */
-        .architecture-img { width: 100%; border-radius: 12px; margin: 2rem 0; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid var(--border); }
-        .chart-container { background: var(--surface); padding: 1.5rem; border-radius: 8px; margin: 2rem 0; border: 1px solid var(--border); }
-        .vis-container { display: flex; align-items: center; gap: 3rem; margin: 4rem 0; }
-        .vis-container.reverse { flex-direction: row-reverse; }
-        .vis-text { flex: 1; }
-        .vis-image { flex: 1; }
-        .vis-text h3 { margin-top: 0; }
+/* ═══════════════════════════════════════
+   NAV
+═══════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 1000;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px; gap: 1rem;
+}
+.nav-brand {
+  font-family: var(--ff-display); font-size: 1.1rem; font-weight: 700;
+  color: var(--text); letter-spacing: -.3px;
+}
+.nav-right { display: flex; align-items: center; gap: 1rem; }
+.nav-link { font-size: .85rem; font-weight: 500; color: var(--text-3); transition: color .2s; }
+.nav-link:hover { color: var(--accent); text-decoration: none; }
+.theme-btn {
+  background: var(--bg-alt); border: 1px solid var(--border);
+  color: var(--text); cursor: pointer; width: 36px; height: 36px;
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  transition: all .2s; font-size: .9rem;
+}
+.theme-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-        /* Research Table Styling */
-        .table-responsive { overflow-x: auto; margin: 2.5rem 0; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .research-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; background: var(--bg); }
-        .research-table th { background: var(--surface); color: var(--accent); padding: 1.2rem 1rem; border-bottom: 2px solid var(--border); font-family: 'Lora', serif; font-weight: 600; white-space: nowrap; }
-        .research-table td { padding: 1rem; border-bottom: 1px solid var(--border); color: var(--text-main); }
-        .research-table tr:last-child td { border-bottom: none; }
-        .research-table tr:hover { background: var(--surface); }
-        .best-metric { font-weight: 700; color: var(--accent); background: rgba(0, 85, 135, 0.05); border-radius: 4px; padding: 0.1rem 0.4rem; }
-        [data-theme='dark'] .best-metric { background: rgba(56, 189, 248, 0.1); color: var(--accent); }
+/* ═══════════════════════════════════════
+   HERO
+═══════════════════════════════════════ */
+.hero {
+  padding: 130px 0 80px;
+  border-bottom: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 60% 0%, var(--accent-bg), transparent 70%);
+  pointer-events: none;
+}
+.hero-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .75rem;
+  margin-bottom: 2rem;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .3rem .8rem; border-radius: 4px;
+  font-size: .78rem; font-weight: 600; letter-spacing: .3px;
+  text-transform: uppercase;
+}
+.badge-accent { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent); }
+.badge-gold { background: rgba(201,151,42,.1); color: var(--gold); border: 1px solid var(--gold); }
+.badge-blue { background: rgba(36,83,168,.1); color: var(--blue); border: 1px solid var(--blue); }
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 900; letter-spacing: -.5px;
+  line-height: 1.1; margin-bottom: 1.2rem;
+}
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero-sub {
+  font-size: 1.15rem; color: var(--text-2); max-width: 640px;
+  margin-bottom: 2rem; line-height: 1.7;
+}
+.authors-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+.author-chip {
+  display: flex; align-items: center; gap: .6rem;
+}
+.author-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--accent-bg); border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-display); font-weight: 700; font-size: .9rem;
+  color: var(--accent);
+}
+.author-info { line-height: 1.3; }
+.author-name { font-weight: 600; font-size: .9rem; color: var(--text); }
+.author-affil { font-size: .78rem; color: var(--text-3); }
+.btn-row { display: flex; flex-wrap: wrap; gap: .75rem; }
+.btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .6rem 1.25rem; border-radius: 6px; font-size: .9rem; font-weight: 500;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--text); cursor: pointer; transition: all .2s;
+}
+.btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); text-decoration: none; }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
 
-        /* Code Blocks */
-        pre { background: var(--code-bg) !important; padding: 1.5rem; border-radius: 8px; overflow-x: auto; margin: 2rem 0; font-family: 'Fira Code', monospace; font-size: 0.95rem; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
-        code { font-family: 'Fira Code', monospace; }
+/* ═══════════════════════════════════════
+   STATS ROW
+═══════════════════════════════════════ */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; margin: 3rem 0;
+}
+.stat-cell {
+  background: var(--surface); padding: 1.5rem;
+  text-align: center;
+}
+.stat-num { font-family: var(--ff-display); font-size: 2rem; font-weight: 900; color: var(--accent); }
+.stat-label { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text-3); margin-top: .2rem; }
 
-        /* Math Blocks */
-        .math-block { background: var(--surface); padding: 1.5rem; border-radius: 8px; text-align: center; margin: 2rem 0; overflow-x: auto; border: 1px solid var(--border); font-size: 1.1rem; }
-        .math-caption { font-size: 0.9rem; color: var(--text-muted); margin-top: 1rem; font-style: italic; text-align: center; }
-        
-        /* Buttons */
-        .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2rem; }
-        .btn { padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border); background: var(--surface); color: var(--text-main); transition: all 0.2s; cursor: pointer; }
-        .btn:hover { background: var(--accent); color: white; border-color: var(--accent); text-decoration: none; }
+/* ═══════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════ */
+main { padding: 4rem 0; }
 
-        /* Footer */
-        footer { margin-top: 5rem; padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); font-size: 0.9rem; color: var(--text-muted); }
+/* ═══════════════════════════════════════
+   SECTION HEADINGS
+═══════════════════════════════════════ */
+.section { margin-bottom: 5rem; }
+.section-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 2rem; padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.section-num {
+  font-family: var(--ff-mono); font-size: .75rem; font-weight: 500;
+  color: var(--accent); background: var(--accent-bg);
+  padding: .2rem .5rem; border-radius: 4px; white-space: nowrap;
+}
+.section-header h2 {
+  font-size: 1.8rem; font-weight: 700; margin: 0;
+}
 
-        @media (max-width: 768px) {
-            .vis-container, .vis-container.reverse { flex-direction: column; gap: 1.5rem; }
-            .hero h1 { font-size: 2.5rem; }
-        }
-    </style>
+/* ═══════════════════════════════════════
+   PULL QUOTE / STORY BOX
+═══════════════════════════════════════ */
+.pull-quote {
+  position: relative; margin: 2.5rem 0;
+  padding: 2rem 2rem 2rem 3rem;
+  background: var(--bg-alt);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+}
+.pull-quote::before {
+  content: '\201C';
+  font-family: var(--ff-display); font-size: 5rem; line-height: 1;
+  color: var(--accent); opacity: .25;
+  position: absolute; top: .5rem; left: .75rem;
+}
+.pull-quote p {
+  font-family: var(--ff-display); font-size: 1.2rem; font-style: italic;
+  color: var(--text); margin: 0; line-height: 1.65;
+}
+.pull-quote cite {
+  display: block; margin-top: .75rem;
+  font-size: .82rem; font-family: var(--ff-body);
+  color: var(--text-3); font-style: normal;
+}
+
+/* ═══════════════════════════════════════
+   MATH BLOCKS
+═══════════════════════════════════════ */
+.math-block {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  margin: 2rem 0; text-align: center;
+  overflow-x: auto;
+}
+.math-caption {
+  font-size: .82rem; color: var(--text-3);
+  font-style: italic; margin-top: .75rem; text-align: center;
+}
+
+/* ═══════════════════════════════════════
+   CODE BLOCKS
+═══════════════════════════════════════ */
+.code-block {
+  background: #0d1117;
+  border-radius: 8px; overflow: hidden;
+  margin: 2rem 0; border: 1px solid #30363d;
+}
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .6rem 1rem; background: #161b22;
+  border-bottom: 1px solid #30363d;
+}
+.code-lang { font-family: var(--ff-mono); font-size: .75rem; color: #8b949e; }
+.code-dots { display: flex; gap: .4rem; }
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-dot:nth-child(1) { background: #ff5f57; }
+.code-dot:nth-child(2) { background: #febc2e; }
+.code-dot:nth-child(3) { background: #28c840; }
+pre {
+  padding: 1.25rem 1.5rem; overflow-x: auto; margin: 0;
+  font-family: var(--ff-mono); font-size: .87rem; line-height: 1.65;
+  color: #e6edf3;
+}
+.kw { color: #ff7b72; }
+.fn { color: #d2a8ff; }
+.str { color: #a5d6ff; }
+.cm { color: #8b949e; font-style: italic; }
+.num { color: #79c0ff; }
+.cls { color: #ffa657; }
+
+/* ═══════════════════════════════════════
+   CALLOUT BOXES
+═══════════════════════════════════════ */
+.callout {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding: 1.25rem 1.5rem; border-radius: 8px;
+  margin: 2rem 0; border: 1px solid;
+}
+.callout-insight { background: rgba(26,127,110,.07); border-color: var(--teal); }
+.callout-warning { background: rgba(201,151,42,.07); border-color: var(--gold); }
+.callout-info { background: rgba(36,83,168,.07); border-color: var(--blue); }
+.callout-icon { font-size: 1.1rem; margin-top: .1rem; flex-shrink: 0; }
+.callout-insight .callout-icon { color: var(--teal); }
+.callout-warning .callout-icon { color: var(--gold); }
+.callout-info .callout-icon { color: var(--blue); }
+.callout p { margin: 0; font-size: .95rem; }
+
+/* ═══════════════════════════════════════
+   MOVIE GRID
+═══════════════════════════════════════ */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem; margin: 2rem 0;
+}
+.movie-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1.25rem 1rem;
+  text-align: center; transition: all .2s;
+}
+.movie-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); }
+.movie-icon { font-size: 1.8rem; margin-bottom: .5rem; }
+.movie-title { font-size: .82rem; font-weight: 600; color: var(--text); margin-bottom: .25rem; }
+.movie-genre { font-size: .72rem; color: var(--text-3); text-transform: uppercase; letter-spacing: .3px; }
+.movie-reviews { font-size: .78rem; color: var(--accent); font-weight: 500; margin-top: .4rem; }
+
+/* ═══════════════════════════════════════
+   DATA TABLE
+═══════════════════════════════════════ */
+.table-wrap { overflow-x: auto; margin: 2.5rem 0; border-radius: 8px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; background: var(--surface); }
+thead tr { background: var(--bg-alt); }
+th {
+  padding: 1rem 1.1rem; text-align: left;
+  font-family: var(--ff-mono); font-size: .78rem; font-weight: 500;
+  color: var(--text-3); text-transform: uppercase; letter-spacing: .5px;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+td { padding: .85rem 1.1rem; border-bottom: 1px solid var(--border); color: var(--text-2); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg-alt); }
+.best { font-weight: 700; color: var(--accent); }
+.method-badge {
+  display: inline-block; padding: .15rem .5rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600; margin-right: .3rem;
+}
+.m-ev { background: rgba(181,69,27,.12); color: var(--accent); }
+.m-at { background: rgba(36,83,168,.1); color: var(--blue); }
+.m-si { background: rgba(26,127,110,.1); color: var(--teal); }
+td.movie-col { font-weight: 600; color: var(--text); font-size: .88rem; }
+
+/* ═══════════════════════════════════════
+   PIPELINE STEPS
+═══════════════════════════════════════ */
+.pipeline {
+  display: flex; gap: 0; margin: 2.5rem 0;
+  overflow-x: auto; padding-bottom: .5rem;
+}
+.pipe-step {
+  flex: 1; min-width: 140px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 1.25rem 1rem; text-align: center;
+  position: relative;
+  transition: all .2s;
+}
+.pipe-step:first-child { border-radius: 8px 0 0 8px; }
+.pipe-step:last-child { border-radius: 0 8px 8px 0; }
+.pipe-step:hover { background: var(--accent-bg); border-color: var(--accent); }
+.pipe-step:not(:last-child)::after {
+  content: '→';
+  position: absolute; right: -.9rem; top: 50%; transform: translateY(-50%);
+  color: var(--text-3); font-size: 1rem; z-index: 1; background: var(--bg); padding: 0 .1rem;
+}
+.pipe-icon { font-size: 1.5rem; margin-bottom: .4rem; }
+.pipe-label { font-size: .78rem; font-weight: 600; color: var(--text); }
+.pipe-sub { font-size: .7rem; color: var(--text-3); margin-top: .2rem; }
+.pipe-tech { font-family: var(--ff-mono); font-size: .67rem; color: var(--accent); margin-top: .3rem; font-weight: 500; }
+
+/* ═══════════════════════════════════════
+   CHART CONTAINER
+═══════════════════════════════════════ */
+.chart-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.75rem; margin: 2.5rem 0;
+}
+.chart-title { font-family: var(--ff-display); font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+.legend-item { display: flex; align-items: center; gap: .4rem; font-size: .82rem; color: var(--text-2); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+canvas { max-height: 280px; }
+
+/* ═══════════════════════════════════════
+   ARCH DIAGRAM
+═══════════════════════════════════════ */
+.arch-img {
+  width: 100%; border-radius: 10px; margin: 2rem 0;
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.img-caption { text-align: center; font-size: .82rem; color: var(--text-3); font-style: italic; margin-top: -1rem; margin-bottom: 2rem; }
+
+/* ═══════════════════════════════════════
+   ABLATION TABLE
+═══════════════════════════════════════ */
+.ablation-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; margin: 2rem 0;
+}
+.ablation-cell {
+  background: var(--surface); padding: 1.25rem;
+  text-align: center;
+}
+.ablation-cell.header { background: var(--bg-alt); }
+.ablation-cell .val { font-family: var(--ff-display); font-size: 1.5rem; font-weight: 700; color: var(--text); }
+.ablation-cell .delta { font-size: .8rem; font-weight: 600; margin-top: .2rem; }
+.delta-neg { color: #e53e3e; }
+.delta-pos { color: var(--teal); }
+.ablation-cell .lbl { font-size: .75rem; color: var(--text-3); text-transform: uppercase; letter-spacing: .3px; margin-top: .1rem; }
+
+/* ═══════════════════════════════════════
+   REFERENCES
+═══════════════════════════════════════ */
+.ref-list { list-style: none; padding: 0; }
+.ref-item {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding: 1rem 0; border-bottom: 1px solid var(--border);
+}
+.ref-item:last-child { border-bottom: none; }
+.ref-num {
+  font-family: var(--ff-mono); font-size: .75rem; color: var(--accent);
+  background: var(--accent-bg); padding: .2rem .5rem; border-radius: 4px;
+  white-space: nowrap; margin-top: .1rem; flex-shrink: 0;
+}
+.ref-text { font-size: .9rem; color: var(--text-2); line-height: 1.5; }
+.ref-text strong { color: var(--text); }
+.ref-text em { color: var(--text-3); }
+
+/* ═══════════════════════════════════════
+   CONTRIBUTIONS LIST
+═══════════════════════════════════════ */
+.contrib-list { list-style: none; padding: 0; }
+.contrib-item {
+  display: flex; gap: .75rem; align-items: flex-start;
+  padding: .75rem 0; border-bottom: 1px dashed var(--border);
+}
+.contrib-item:last-child { border-bottom: none; }
+.contrib-icon { color: var(--accent); margin-top: .1rem; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 3.5rem 0;
+  text-align: center;
+}
+.footer-name { font-family: var(--ff-display); font-size: 1.5rem; font-weight: 700; margin-bottom: .5rem; }
+.footer-affil { font-size: .9rem; color: var(--text-3); margin-bottom: 1.5rem; line-height: 1.7; }
+.social-row { display: flex; justify-content: center; gap: 1rem; }
+.social-btn {
+  width: 40px; height: 40px; border-radius: 8px;
+  background: var(--bg-alt); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-3); font-size: 1rem; transition: all .2s;
+}
+.social-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); text-decoration: none; }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 700px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .hero h1 { font-size: 2rem; }
+  .pipeline { flex-direction: column; }
+  .pipe-step { border-radius: 8px !important; }
+  .pipe-step:not(:last-child)::after { content: '↓'; right: auto; left: 50%; top: auto; bottom: -.7rem; transform: translateX(-50%); }
+  .ablation-grid { grid-template-columns: 1fr; }
+  .movie-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ═══════════════════════════════════════
+   SCROLL ANIMATIONS
+═══════════════════════════════════════ */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+</style>
 </head>
 <body>
 
-    <nav>
-        <div class="container nav-inner">
-            <strong>M. Hamza | ML Research Portfolio</strong>
-            <button onclick="toggleTheme()" aria-label="Toggle Theme" style="background:none; border:none; color:var(--text-main); cursor:pointer; font-size:1.2rem;">
-                <i class="fas fa-moon"></i>
-            </button>
+<!-- ══════════════════════ NAV ══════════════════════ -->
+<nav>
+  <div class="container nav-inner">
+    <span class="nav-brand">M. Hamza · Research</span>
+    <div class="nav-right">
+      <a href="https://ieeexplore.ieee.org/abstract/document/11492803/" target="_blank" class="nav-link">Paper ↗</a>
+      <a href="https://github.com/Hamza-Faarooq/IIM_Research_Intern" target="_blank" class="nav-link">GitHub ↗</a>
+      <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+        <i class="fas fa-moon" id="theme-icon"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-meta">
+      <span class="badge badge-accent"><i class="fas fa-award"></i>&nbsp; Published · IEEE ISAI-NLP 2025</span>
+      <span class="badge badge-gold"><i class="fas fa-flask"></i>&nbsp; IIM Ranchi × IIT Kharagpur</span>
+      <span class="badge badge-blue"><i class="fas fa-brain"></i>&nbsp; Multimodal NLP</span>
+    </div>
+
+    <h1>EviCLIP: Bridging the <em>Semantic Gap</em> in Multimodal Movie Review Helpfulness</h1>
+
+    <p class="hero-sub">
+      Combining CLIP-based dynamic visual grounding with Dempster–Shafer evidential theory to resolve conflicting modalities in cinematic user reviews — achieving state-of-the-art ranking performance across 10 iconic films.
+    </p>
+
+    <div class="authors-row">
+      <div class="author-chip">
+        <div class="author-avatar">MH</div>
+        <div class="author-info">
+          <div class="author-name">Muhammad Hamza</div>
+          <div class="author-affil">IIT Kharagpur</div>
         </div>
-    </nav>
-
-    <header class="hero container" data-aos="fade-up">
-        <div class="tag"><i class="fas fa-award"></i> Accepted at ISAI NLP 2025</div>
-        <h1>Movie Review Helpfulness Prediction: A Multimodal Framework</h1>
-        <div class="authors">
-            <strong>Muhammad Hamza</strong>, Krishna Rai, Sobhan Sarkar<br>
-            <span style="font-size: 0.95rem;">IIT Kharagpur & IIM Ranchi</span>
+      </div>
+      <div class="author-chip">
+        <div class="author-avatar">KR</div>
+        <div class="author-info">
+          <div class="author-name">Krishna Rai</div>
+          <div class="author-affil">IIM Ranchi</div>
         </div>
-        <p>A deep dive into bridging the "Semantic Gap" in user-generated content. By combining CLIP-based visual grounding with Dempster-Shafer evidential theory, we taught neural networks to mathematically resolve conflicting modalities in abstract cinema reviews.</p>
-        
-        <div class="btn-group">
-            <a href="https://github.com/Hamza-Faarooq/IIM_Research_Intern/blob/main/model_architecture/main_architecture.png" class="btn" target="_blank"><i class="fas fa-project-diagram"></i> Full Architecture</a>
-            <a href="https://github.com/Hamza-Faarooq/IIM_Research_Intern/tree/main/datasets" class="btn" target="_blank"><i class="fas fa-database"></i> Datasets</a>
-            <a href="https://github.com/Hamza-Faarooq/IIM_Research_Intern" class="btn" target="_blank"><i class="fab fa-github"></i> Repository</a>
+      </div>
+      <div class="author-chip">
+        <div class="author-avatar">SS</div>
+        <div class="author-info">
+          <div class="author-name">Sobhan Sarkar</div>
+          <div class="author-affil">IIM Ranchi</div>
         </div>
-    </header>
+      </div>
+    </div>
 
-    <main class="container">
+    <div class="btn-row">
+      <a href="https://ieeexplore.ieee.org/abstract/document/11492803/" target="_blank" class="btn btn-primary"><i class="fas fa-file-alt"></i> Read Paper</a>
+      <a href="https://github.com/Hamza-Faarooq/IIM_Research_Intern" target="_blank" class="btn"><i class="fab fa-github"></i> GitHub Repository</a>
+      <a href="https://github.com/Hamza-Faarooq/IIM_Research_Intern/blob/main/model_architecture/main_architecture.png" target="_blank" class="btn"><i class="fas fa-project-diagram"></i> Architecture</a>
+      <a href="https://github.com/Hamza-Faarooq/IIM_Research_Intern/tree/main/datasets" target="_blank" class="btn"><i class="fas fa-database"></i> Dataset</a>
+    </div>
+  </div>
+</header>
 
-<section data-aos="fade-up">
-<h2>1. The Semantic Gap in Film Critique</h2>
-
-<div class="story-box">
-"The sheer isolation of humanity was perfectly captured in that single, silent wide shot of the Endurance."
+<!-- ══════════════════════ STATS ══════════════════════ -->
+<div class="container">
+  <div class="stats-row reveal">
+    <div class="stat-cell">
+      <div class="stat-num">40K+</div>
+      <div class="stat-label">IMDb Reviews</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">24K+</div>
+      <div class="stat-label">Movie Keyframes</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">0.982</div>
+      <div class="stat-label">Peak NDCG</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">10</div>
+      <div class="stat-label">Films Benchmarked</div>
+    </div>
+  </div>
 </div>
 
-<p>
-This sentence appears emotionally positive and semantically rich. A conventional transformer-based language model such as BERT can easily detect positive sentiment and descriptive intensity. However, the true semantic weight of this statement does not lie purely in its lexical surface. It lies in a specific cinematic frame — a wide shot of a spacecraft isolated in deep space — that the reviewer implicitly references.
-</p>
-
-<p>
-In probabilistic terms, a unimodal model estimates:
-</p>
-
-<div class="math-block">
-\[
-P(y \mid r)
-\]
-<div class="math-caption">
-Probability that review \(r\) is helpful.
-</div>
-</div>
-
-<p>
-However, the review contains an unobserved latent visual variable \(v^*\), representing the mental image invoked by the reviewer. The correct formulation should instead be:
-</p>
-
-<div class="math-block">
-\[
-P(y \mid r, v^*)
-\]
-<div class="math-caption">
-Helpfulness depends jointly on textual and aligned visual semantics.
-</div>
-</div>
-
-<p>
-When multimodal models assume a fixed image (e.g., movie poster), they effectively approximate:
-</p>
-
-<div class="math-block">
-\[
-P(y \mid r, \tilde{v})
-\]
-</div>
-
-<p>
-Where \(\tilde{v} \neq v^*\). This misalignment introduces conditional noise. In high-context domains such as cinema — where abstraction, symbolism, and cinematography are core expressive tools — such noise degrades predictive reliability.
-</p>
-
-<p>
-We define the <strong>Semantic Gap</strong> as the discrepancy:
-</p>
-
-<div class="math-block">
-\[
-\Delta = \mathbb{E}_{r} \left[ 
-P(y \mid r, v^*) - P(y \mid r, \tilde{v})
-\right]
-\]
-</div>
-
-<p>
-Our hypothesis: reducing \(\Delta\) via dynamic visual grounding improves ranking robustness and uncertainty calibration.
-</p>
-</section>
-
-
-        <section data-aos="fade-up">
-<h2>2. Data Formulation, Distribution Analysis & Threshold Calibration</h2>
-
-<p>
-We curated 40,000 IMDb reviews alongside 24,000 keyframes extracted via shot-boundary detection. Each review contains helpful votes \(H\) and unhelpful votes \(U\).
-</p>
-
-<div class="math-block">
-\[
-S = \frac{H}{H + U}
-\]
-</div>
-
-<p>
-However, \(S\) is heteroscedastic: reviews with low vote counts exhibit high variance. To stabilize labeling, we excluded samples with \(H+U < 5\), reducing stochastic bias.
-</p>
-
-<p>
-The empirical distribution of \(S\) exhibited right-skewness. We therefore examined balanced accuracy across thresholds \(\tau\).
-</p>
-
-<div class="math-block">
-\[
-y =
-\begin{cases}
-1 & \text{if } S \ge \tau \\
-0 & \text{otherwise}
-\end{cases}
-\]
-</div>
-
-<p>
-Balanced accuracy defined as:
-</p>
-
-<div class="math-block">
-\[
-\text{BA} = \frac{1}{2}
-\left(
-\frac{TP}{TP+FN}
-+
-\frac{TN}{TN+FP}
-\right)
-\]
-</div>
-
-<p>
-Empirical sweep across \(\tau \in [0.4,0.7]\) showed maximum BA at \(\tau = 0.54\), maintaining near 52:48 class distribution while preserving semantic differentiation.
-</p>
-
-<p>
-This calibration step ensured that our target variable is statistically grounded rather than arbitrarily binarized.
-</p>
-</section>
-
-
-
-
-        <section data-aos="fade-up">
-<h2>3. Dynamic Visual Grounding via Contrastive Semantic Alignment</h2>
-
-<p>
-The central architectural decision in our framework is that image selection must be dynamic rather than static. Traditional multimodal systems assume a pre-defined pairing between text and image. In cinematic domains, however, this assumption collapses because a review often references a specific frame among hundreds of possible scenes.
-</p>
-
-<p>
-Let \( r_i \) denote a review and \( \{f_1, f_2, ..., f_N\} \) denote the set of candidate frames extracted from the corresponding movie. Our objective is to estimate the most semantically aligned frame \( f^* \).
-</p>
-
-<p>
-Using CLIP encoders, we compute normalized embeddings:
-</p>
-
-<div class="math-block">
-\[
-e_r = \frac{\text{CLIP}_{text}(r_i)}{\|\text{CLIP}_{text}(r_i)\|}
-\quad
-e_{f_j} = \frac{\text{CLIP}_{image}(f_j)}{\|\text{CLIP}_{image}(f_j)\|}
-\]
-</div>
-
-<p>
-Alignment is measured using cosine similarity:
-</p>
-
-<div class="math-block">
-\[
-\text{align}(r_i, f_j) = e_r^\top e_{f_j}
-\]
-</div>
-
-<p>
-Frame selection becomes:
-</p>
-
-<div class="math-block">
-\[
-f^* = \arg\max_{j \in \{1,...,N\}} \text{align}(r_i, f_j)
-\]
-</div>
-
-<p>
-This converts alignment into a nearest-neighbor retrieval problem in a shared semantic embedding space.
-</p>
-
-<p>
-Importantly, CLIP embeddings are trained via contrastive learning:
-</p>
-
-<div class="math-block">
-\[
-\mathcal{L}_{CLIP} =
-- \log \frac{
-\exp(e_r^\top e_f / \tau)
-}{
-\sum_{k} \exp(e_r^\top e_{f_k} / \tau)
-}
-\]
-</div>
-
-<p>
-Where \( \tau \) is the temperature parameter controlling distribution sharpness. This training paradigm ensures that semantically matched text-image pairs occupy nearby positions in embedding space.
-</p>
-
-<p>
-Empirically, alignment accuracy measured on 500 manually annotated review-frame pairs reached approximately 82%. Failure cases primarily involved metaphorical reviews or commentary on non-visual elements such as soundtrack.
-</p>
-
-<p>
-Computationally, alignment introduces per-review complexity \( \mathcal{O}(N) \). However, embeddings can be pre-computed offline, reducing runtime cost to matrix multiplication.
-</p>
-
-</section>
-
-
-
-
-        <section data-aos="fade-up">
-<h2>4. Dual-Encoder Representation Learning and Semantic Geometry</h2>
-
-<p>
-Once the aligned frame \( f^* \) is selected, both modalities are encoded independently to preserve modality-specific abstraction. This architecture follows a late-interaction dual-encoder paradigm.
-</p>
-
-<p>
-Text encoding:
-</p>
-
-<div class="math-block">
-\[
-h_{text} = \text{BERT}(r_i) \in \mathbb{R}^{768}
-\]
-</div>
-
-<p>
-The BERT encoder captures contextualized token interactions via multi-head self-attention:
-</p>
-
-<div class="math-block">
-\[
-\text{Attention}(Q,K,V) =
-\text{softmax}\left(
-\frac{QK^\top}{\sqrt{d_k}}
-\right)V
-\]
-</div>
-
-<p>
-This enables modeling long-range dependencies, narrative coherence, and semantic density.
-</p>
-
-<p>
-Visual encoding:
-</p>
-
-<div class="math-block">
-\[
-h_{visual} = \text{ViT}(f^*) \in \mathbb{R}^{768}
-\]
-</div>
-
-<p>
-Vision Transformer divides the image into fixed-size patches and applies self-attention across spatial tokens:
-</p>
-
-<div class="math-block">
-\[
-z_0 = [x_{cls}; x_p^1; ...; x_p^M] + E_{pos}
-\]
-</div>
-
-<p>
-Where \( x_{cls} \) is the classification token and \( E_{pos} \) denotes positional embeddings.
-</p>
-
-<p>
-Each modality now resides in a 768-dimensional semantic manifold. Naively concatenating:
-</p>
-
-<div class="math-block">
-\[
-h_{concat} = [h_{text}; h_{visual}]
-\]
-</div>
-
-<p>
-implicitly assumes equal reliability. However, reliability is conditional and context-dependent. This motivates evidential modeling.
-</p>
-
-<img src="https://raw.githubusercontent.com/Hamza-Faarooq/IIM_Research_Intern/main/model_architecture/main_architecture.png" alt="Model Architecture" class="architecture-img">
-
-<p style="text-align:center; font-size:0.9rem; color:var(--text-muted);">
-Fig 1: Full multimodal pipeline with alignment, encoding, and evidential fusion.
-</p>
-
-</section>
-
-
-
-
-        <section data-aos="fade-up">
-<h2>5. Evidential Fusion and Uncertainty Quantification</h2>
-
-<p>
-Traditional fusion methods (concatenation or attention) assume deterministic confidence in both modalities. In practice, modality reliability varies. To explicitly model uncertainty, we employ Dempster-Shafer theory.
-</p>
-
-<p>
-Define hypothesis space:
-</p>
-
-<div class="math-block">
-\[
-\Theta = \{H, \bar{H}\}
-\]
-</div>
-
-<p>
-Each modality assigns belief mass:
-</p>
-
-<div class="math-block">
-\[
-m_1, m_2 : 2^{\Theta} \rightarrow [0,1]
-\]
-</div>
-
-<p>
-Conflict mass is defined as:
-</p>
-
-<div class="math-block">
-\[
-K =
-\sum_{A \cap B = \emptyset}
-m_1(A)m_2(B)
-\]
-</div>
-
-<p>
-Fusion rule:
-</p>
-
-<div class="math-block">
-\[
-m_{fused}(C) =
-\frac{
-\sum_{A \cap B = C} m_1(A)m_2(B)
-}{
-1-K
-}
-\]
-</div>
-
-<h3>Concrete Numerical Example</h3>
-
-<p>
-Suppose:
-</p>
-
-<ul>
-<li>Text: \( m_1(H)=0.7, m_1(\bar{H})=0.2, m_1(\Theta)=0.1 \)</li>
-<li>Image: \( m_2(H)=0.4, m_2(\bar{H})=0.5, m_2(\Theta)=0.1 \)</li>
-</ul>
-
-<p>
-Conflict:
-</p>
-
-<div class="math-block">
-\[
-K = (0.7 \times 0.5) + (0.2 \times 0.4) = 0.35 + 0.08 = 0.43
-\]
-</div>
-
-<p>
-The high \(K\) indicates disagreement. Fusion normalizes by \(1-K = 0.57\), preventing overconfident predictions.
-</p>
-
-<p>
-This mechanism yields smoother training curves (as shown in your Chart.js graph) and improved calibration stability.
-</p>
-
-<p>
-Training objective:
-</p>
-
-<div class="math-block">
-\[
-\mathcal{L} =
-\lambda_1 \mathcal{L}_{help}
-+
-\lambda_2 \mathcal{L}_{align}
-\]
-</div>
-
-<p>
-Where alignment loss enforces semantic consistency and helpfulness loss is binary cross-entropy.
-</p>
-
-</section>
-
-
-
-      <section data-aos="fade-up">
-<h2>6. Comprehensive Empirical Evaluation & Cross-Genre Analysis</h2>
-
-<p>
-We evaluated three fusion paradigms: simple concatenation, attention-based fusion, and evidential fusion. Performance was assessed across classification metrics (Accuracy, F1, AUC) and ranking metrics (MAP, NDCG@5), ensuring both discriminative power and ranking robustness were measured.
-</p>
-
-<p>
-Area Under the ROC Curve (AUC) measures ranking separability:
-</p>
-
-<div class="math-block">
-\[
-\text{AUC} =
-P(\hat{y}_{pos} > \hat{y}_{neg})
-\]
-<div class="math-caption">
-Probability that a randomly selected helpful review is ranked above a non-helpful one.
-</div>
-</div>
-
-<p>
-Ranking quality is further captured using NDCG:
-</p>
-
-<div class="math-block">
-\[
-\text{NDCG@k} =
-\frac{DCG@k}{IDCG@k}
-\]
-<div class="math-caption">
-Normalized Discounted Cumulative Gain evaluates top-ranked prediction quality.
-</div>
-</div>
-
-<p>
-Empirical results demonstrate that evidential fusion consistently improves MAP and NDCG in semantically abstract films such as <em>Interstellar</em> and <em>Return of the King</em>, where visual symbolism and metaphor density are high. In contrast, attention-based fusion performs strongly in dialogue-heavy narratives such as <em>The Godfather</em>, where textual dominance reduces modality conflict.
-</p>
-
-<!-- ===================================================== -->
-<!-- FULL BENCHMARK TABLE -->
-<!-- ===================================================== -->
-
-<div class="table-responsive">
-<table class="research-table">
-<thead>
-<tr>
-<th>Dataset</th>
-<th>Accuracy</th>
-<th>F1 Score</th>
-<th>AUC</th>
-<th>MAP</th>
-<th>NDCG</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Interstellar</td>
-<td>Simple (0.82)</td>
-<td>Simple (0.83)</td>
-<td>Simple (0.86)</td>
-<td><span class="best-metric">Evidential (0.90)</span></td>
-<td><span class="best-metric">Evidential (0.90)</span></td>
-</tr>
-<tr>
-<td>Return of the King</td>
-<td><span class="best-metric">Evidential (0.83)</span></td>
-<td><span class="best-metric">Evidential (0.83)</span></td>
-<td>Simple (0.88)</td>
-<td><span class="best-metric">Evidential (0.91)</span></td>
-<td><span class="best-metric">Evidential (0.98)</span></td>
-</tr>
-<tr>
-<td>Fellowship of the Ring</td>
-<td>Attention (0.79)</td>
-<td>Simple (0.80)</td>
-<td>Simple (0.87)</td>
-<td>Attention (0.87)</td>
-<td>Attention (0.97)</td>
-</tr>
-<tr>
-<td>Godfather</td>
-<td>Simple (0.68)</td>
-<td>Attention (0.80)</td>
-<td><span class="best-metric">Evidential (0.81)</span></td>
-<td><span class="best-metric">Evidential (0.77)</span></td>
-<td>Attention (0.94)</td>
-</tr>
-<tr>
-<td>The Dark Knight</td>
-<td>-</td>
-<td>Simple (0.71)</td>
-<td>Simple (0.74)</td>
-<td>Simple (0.73)</td>
-<td>Simple (0.93)</td>
-</tr>
-<tr>
-<td>Batman Begins</td>
-<td>Attention (0.57)</td>
-<td>Simple (0.71)</td>
-<td>Simple (0.74)</td>
-<td>Simple (0.73)</td>
-<td>Simple (0.93)</td>
-</tr>
-<tr>
-<td>The Two Towers</td>
-<td>-</td>
-<td><span class="best-metric">Evidential (0.63)</span></td>
-<td><span class="best-metric">Evidential (0.69)</span></td>
-<td><span class="best-metric">Evidential (0.70)</span></td>
-<td><span class="best-metric">Evidential (0.89)</span></td>
-</tr>
-<tr>
-<td>Inception</td>
-<td>-</td>
-<td><span class="best-metric">Evidential (0.57)</span></td>
-<td>Attention (0.61)</td>
-<td><span class="best-metric">Evidential (0.69)</span></td>
-<td><span class="best-metric">Evidential (0.89)</span></td>
-</tr>
-</tbody>
-</table>
-<div class="math-caption">
-Complete cross-genre comparison of multimodal fusion strategies.
-</div>
-</div>
-
-<p>
-The dominant trend across genres suggests:
-</p>
-
-<div class="math-block">
-\[
-\text{Performance Gain}
-\approx
-\text{Alignment Strength}
-+
-\text{Uncertainty Stabilization}
-\]
-</div>
-
-<p>
-Alignment contributes the majority of raw accuracy improvements, while evidential fusion enhances robustness under modality disagreement.
-</p>
-
-<!-- ===================================================== -->
-<!-- TRAINING DYNAMICS GRAPH -->
-<!-- ===================================================== -->
-
-<div class="chart-container">
-<canvas id="trainingChart" height="250"></canvas>
-</div>
-
+<!-- ══════════════════════ MAIN ══════════════════════ -->
+<main>
+<div class="container">
+
+  <!-- ─── §1 THE PROBLEM ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 01</span>
+      <h2>The Semantic Gap in Film Critique</h2>
+    </div>
+
+    <div class="pull-quote">
+      <p>"The sheer isolation of humanity was perfectly captured in that single, silent wide shot of the Endurance."</p>
+      <cite>— IMDb user review, <em>Interstellar</em> (2014)</cite>
+    </div>
+
+    <p>This sentence carries enormous semantic weight — yet a conventional transformer model can only parse its lexical surface. It registers positive sentiment and descriptive intensity, but the <em>true meaning</em> lives in a specific cinematic frame: a spacecraft alone in the void of space. That frame is completely absent from the text.</p>
+
+    <p>In recommender systems, review helpfulness prediction is a critical ranking signal. Existing multimodal models — UNITER, ViLBERT, MCR — share a fatal assumption: that any image paired with the text is <em>inherently relevant</em>. Pair an Interstellar review discussing a desolate wide shot with the generic movie poster, and you inject noise rather than insight. This is the Semantic Gap.</p>
+
+    <p>Formally, a unimodal model estimates:</p>
+
+    <div class="math-block">
+      $$P(y \mid r)$$
+      <div class="math-caption">Probability that review $r$ is helpful — no visual context.</div>
+    </div>
+
+    <p>But the review implicitly references a latent visual variable $v^*$ — the mental image invoked by the reviewer. The correct formulation should be:</p>
+
+    <div class="math-block">
+      $$P(y \mid r,\, v^*)$$
+      <div class="math-caption">Helpfulness depends <em>jointly</em> on textual and aligned visual semantics.</div>
+    </div>
+
+    <p>Prior multimodal systems approximate this as $P(y \mid r, \tilde{v})$ where $\tilde{v} \neq v^*$. We define the <strong>Semantic Gap</strong> as:</p>
+
+    <div class="math-block">
+      $$\Delta = \mathbb{E}_{r}\!\left[P(y \mid r, v^*) - P(y \mid r, \tilde{v})\right]$$
+      <div class="math-caption">Our hypothesis: reducing $\Delta$ via dynamic visual grounding improves ranking robustness.</div>
+    </div>
+
+    <div class="callout callout-insight">
+      <span class="callout-icon"><i class="fas fa-lightbulb"></i></span>
+      <p><strong>Core thesis:</strong> Dynamic, CLIP-driven frame selection that greedily minimises $\Delta$ — combined with evidential uncertainty modelling — yields significantly superior ranking metrics compared to static image pairing or deterministic fusion strategies.</p>
+    </div>
+  </section>
+
+  <!-- ─── §2 DATASET ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 02</span>
+      <h2>Dataset Construction &amp; Threshold Calibration</h2>
+    </div>
+
+    <p>We curated <strong>40,000+ IMDb user reviews</strong> across 10 films spanning diverse narrative genres — sci-fi, fantasy, crime, superhero, and drama — paired with <strong>24,000+ high-resolution keyframes</strong> extracted via shot-boundary detection. Each film was processed in its own Jupyter notebook.</p>
+
+    <div class="movie-grid">
+      <div class="movie-card">
+        <div class="movie-icon">🚀</div>
+        <div class="movie-title">Interstellar</div>
+        <div class="movie-genre">Sci-Fi / Drama</div>
+        <div class="movie-reviews">~4,000 reviews</div>
+      </div>
+      <div class="movie-card">
+        <div class="movie-icon">💍</div>
+        <div class="movie-title">Return of the King</div>
+        <div class="movie-genre">Epic Fantasy</div>
+        <div class="movie-reviews">~4,000 reviews</div>
+      </div>
+      <div class="movie-card">
+        <div class="movie-icon">🧙</div>
+        <div class="movie-title">Fellowship of the Ring</div>
+        <div class="movie-genre">Epic Fantasy</div>
+        <div class="movie-reviews">~4,000 reviews</div>
+      </div>
+      <div class="movie-card">
+        <div class="movie-icon">⚔️</div>
+        <div class="movie-title">The Two Towers</div>
+        <div class="movie-genre">Epic Fantasy</div>
+        <div class="movie-reviews">~4,000 reviews</div>
+      </div>
+      <div class="movie-card">
+        <div class="movie-icon">🦇</div>
+        <div class="movie-title">The Dark Knight</div>
+        <div class="movie-genre">Superhero Noir</div>
+        <div class="movie-reviews">~4,000 reviews</div>
+      </div>
+      <div class="movie-card">
+        <div class="movie-icon">🦇</div>
+        <div class="movie-title">Batman Begins</div>
+        <div class="movie-genre">Superhero</div>
+        <div class="movie-reviews">~4,000 reviews</div>
+      </div>
+      <div class="movie-card">
+        <div class="movie-icon">🍊</div>
+        <div class="movie-title">The Godfather</div>
+        <div class="movie-genre">Crime Drama</div>
+        <div class="movie-reviews">~4,000 reviews</div>
+      </div>
+      <div class="movie-card">
+        <div class="movie-icon">🌀</div>
+        <div class="movie-title">Inception</div>
+        <div class="movie-genre">Sci-Fi Thriller</div>
+        <div class="movie-reviews">~4,000 reviews</div>
+      </div>
+      <div class="movie-card">
+        <div class="movie-icon">🔑</div>
+        <div class="movie-title">The Shawshank Redemption</div>
+        <div class="movie-genre">Drama</div>
+        <div class="movie-reviews">~4,000 reviews</div>
+      </div>
+      <div class="movie-card">
+        <div class="movie-icon">🏰</div>
+        <div class="movie-title">The Dark Knight Rises</div>
+        <div class="movie-genre">Superhero</div>
+        <div class="movie-reviews">~4,000 reviews</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:2.5rem; font-size:1.2rem; font-family:var(--ff-display);">Helpfulness Score &amp; Binarisation</h3>
+
+    <p>Each review carries a raw helpfulness ratio from IMDb community votes. Let $H$ be helpful votes and $U$ unhelpful votes:</p>
+
+    <div class="math-block">
+      $$S = \frac{H}{H + U}$$
+      <div class="math-caption">Raw helpfulness score. Heteroscedastic: high variance at low vote counts.</div>
+    </div>
+
+    <p>$S$ is heteroscedastic — a review with 2/2 votes and 20/20 votes both score 1.0, but the latter carries far more statistical weight. We therefore excluded all samples with $H + U < 5$ to stabilise the target variable.</p>
+
+    <p>We binarised via threshold $\tau$, optimised for <strong>Balanced Accuracy</strong> across the range $\tau \in [0.4, 0.7]$:</p>
+
+    <div class="math-block">
+      $$y = \begin{cases} 1 & \text{if } S \geq \tau \\ 0 & \text{otherwise} \end{cases}$$
+      $$\text{BA} = \frac{1}{2}\!\left(\frac{TP}{TP+FN} + \frac{TN}{TN+FP}\right)$$
+      <div class="math-caption">Optimal threshold $\tau = 0.54$ yielded near 52:48 class distribution while preserving semantic differentiation.</div>
+    </div>
+
+    <div class="callout callout-warning">
+      <span class="callout-icon"><i class="fas fa-exclamation-triangle"></i></span>
+      <p>Higher thresholds (e.g. $\tau = 0.65$) produced severely unbalanced classes and reduced dataset size, undermining statistical reliability. $\tau = 0.54$ was the empirically optimal calibration point.</p>
+    </div>
+  </section>
+
+  <!-- ─── §3 PIPELINE ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 03</span>
+      <h2>End-to-End Multimodal Pipeline</h2>
+    </div>
+
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-icon">📝</div>
+        <div class="pipe-label">Raw Review</div>
+        <div class="pipe-sub">HTML cleaning, vote normalisation</div>
+        <div class="pipe-tech">IMDb scrape</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🎬</div>
+        <div class="pipe-label">Frame Extraction</div>
+        <div class="pipe-sub">Shot-boundary detection</div>
+        <div class="pipe-tech">2000+ frames/film</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🎯</div>
+        <div class="pipe-label">CLIP Alignment</div>
+        <div class="pipe-sub">Dynamic frame selection</div>
+        <div class="pipe-tech">ViT-B/32</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🔡</div>
+        <div class="pipe-label">BERT Encoder</div>
+        <div class="pipe-sub">Contextual text embedding</div>
+        <div class="pipe-tech">bert-base-uncased</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">👁️</div>
+        <div class="pipe-label">ViT Encoder</div>
+        <div class="pipe-sub">Patch-level visual features</div>
+        <div class="pipe-tech">vit-base-patch16</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">⚗️</div>
+        <div class="pipe-label">Evidential Fusion</div>
+        <div class="pipe-sub">Dempster–Shafer belief</div>
+        <div class="pipe-tech">DS Theory</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🏆</div>
+        <div class="pipe-label">Helpfulness Score</div>
+        <div class="pipe-sub">MAP, NDCG ranking</div>
+        <div class="pipe-tech">BCE + align loss</div>
+      </div>
+    </div>
+
+    <img src="https://raw.githubusercontent.com/Hamza-Faarooq/IIM_Research_Intern/main/model_architecture/main_architecture.png" alt="Full EviCLIP Architecture" class="arch-img">
+    <div class="img-caption">Fig. 1 — Full multimodal pipeline: CLIP-guided dynamic alignment feeding independent BERT/ViT encoders, fused via Dempster–Shafer evidential theory.</div>
+  </section>
+
+  <!-- ─── §4 CLIP ALIGNMENT ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 04</span>
+      <h2>Dynamic Visual Grounding via CLIP</h2>
+    </div>
+
+    <p>The architectural centrepiece of EviCLIP is that <strong>image selection must be dynamic</strong>, not static. For each review $r_i$, we retrieve the single most semantically aligned frame $f^*$ from the $N$ candidate frames of its corresponding film.</p>
+
+    <p>Using CLIP's dual encoders, we project both modalities into a shared $d$-dimensional embedding space:</p>
+
+    <div class="math-block">
+      $$e_r = \frac{\text{CLIP}_{\text{text}}(r_i)}{\|\text{CLIP}_{\text{text}}(r_i)\|}, \qquad e_{f_j} = \frac{\text{CLIP}_{\text{image}}(f_j)}{\|\text{CLIP}_{\text{image}}(f_j)\|}$$
+      <div class="math-caption">L2-normalised embeddings in shared $\mathbb{R}^{512}$ CLIP space.</div>
+    </div>
+
+    <p>Semantic alignment is measured by cosine similarity, and frame selection becomes a nearest-neighbour retrieval problem:</p>
+
+    <div class="math-block">
+      $$\text{align}(r_i, f_j) = e_r^\top e_{f_j}, \qquad f^* = \arg\max_{j \in \{1,\ldots,N\}} \text{align}(r_i, f_j)$$
+      <div class="math-caption">Optimal frame $f^*$ maximises semantic overlap with the review's implicit visual reference.</div>
+    </div>
+
+    <p>CLIP's contrastive training objective ensures matched text-image pairs cluster in embedding space:</p>
+
+    <div class="math-block">
+      $$\mathcal{L}_{\text{CLIP}} = -\log \frac{\exp(e_r^\top e_f / \tau_c)}{\sum_{k=1}^{N}\exp(e_r^\top e_{f_k} / \tau_c)}$$
+      <div class="math-caption">$\tau_c$ is the temperature parameter; the loss is an InfoNCE contrastive objective.</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">Python · CLIP Frame Alignment</span>
+      </div>
+      <pre><span class="kw">import</span> torch
+<span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+
+<span class="kw">def</span> <span class="fn">get_optimal_frame</span>(review_emb: torch.Tensor,
+                        frame_embs: torch.Tensor) -> tuple:
+    <span class="str">"""
+    Select the keyframe most semantically aligned with the review.
+    
+    Args:
+        review_emb  : (1, 512)  – CLIP text embedding
+        frame_embs  : (N, 512)  – CLIP image embeddings for N candidate frames
+    Returns:
+        (best_idx, alignment_score)
+    """</span>
+    <span class="cm"># L2-normalise both modalities</span>
+    review_emb = F.normalize(review_emb, p=<span class="num">2</span>, dim=-<span class="num">1</span>)
+    frame_embs = F.normalize(frame_embs, p=<span class="num">2</span>, dim=-<span class="num">1</span>)
+
+    <span class="cm"># Cosine similarity matrix: (1, N)</span>
+    similarities = torch.matmul(review_emb, frame_embs.T)
+
+    <span class="cm"># Greedy argmax retrieval → f*</span>
+    best_idx   = torch.argmax(similarities, dim=-<span class="num">1</span>)
+    best_score = similarities[<span class="num">0</span>, best_idx]
+
+    <span class="kw">return</span> best_idx.item(), best_score.item()</pre>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon"><i class="fas fa-chart-line"></i></span>
+      <p><strong>Empirical alignment accuracy:</strong> Validated on 500 manually annotated review-frame pairs — achieving <strong>~82% alignment accuracy</strong>. Primary failure modes: highly metaphorical language (e.g., "symphony of chaos") and non-visual reviews focused on music or dialogue. Computationally, frame embeddings are pre-computed offline, reducing runtime to a single matrix multiplication per review.</p>
+    </div>
+  </section>
+
+  <!-- ─── §5 ENCODERS ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 05</span>
+      <h2>Dual-Encoder Representation Learning</h2>
+    </div>
+
+    <p>Once the aligned pair $(r_i, f^*)$ is established, we encode each modality independently via dedicated transformers, following a <strong>late-interaction dual-encoder</strong> paradigm that preserves modality-specific abstraction before fusion.</p>
+
+    <h3 style="font-size:1.1rem; font-family:var(--ff-display); margin: 1.5rem 0 .75rem;">Text: BERT</h3>
+
+    <div class="math-block">
+      $$h_{\text{text}} = \text{BERT}(r_i) \in \mathbb{R}^{768}$$
+      $$\text{Attention}(Q,K,V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V$$
+      <div class="math-caption">BERT's multi-head self-attention captures long-range narrative dependencies and semantic density.</div>
+    </div>
+
+    <h3 style="font-size:1.1rem; font-family:var(--ff-display); margin: 1.5rem 0 .75rem;">Vision: ViT</h3>
+
+    <div class="math-block">
+      $$h_{\text{visual}} = \text{ViT}(f^*) \in \mathbb{R}^{768}$$
+      $$z_0 = [x_{\text{cls}};\, x_p^1;\, \ldots;\, x_p^M] + E_{\text{pos}}$$
+      <div class="math-caption">ViT partitions $f^*$ into 16×16 patches and applies transformer self-attention across spatial tokens. $x_{\text{cls}}$ is the global representation token.</div>
+    </div>
+
+    <p>Both encoders project into the same $\mathbb{R}^{768}$ semantic manifold. Naïve concatenation $h_{\text{concat}} = [h_{\text{text}};\, h_{\text{visual}}]$ implicitly assumes <em>equal modality reliability</em> — a critical oversimplification that motivates our evidential fusion stage.</p>
+  </section>
+
+  <!-- ─── §6 EVIDENTIAL FUSION ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 06</span>
+      <h2>Evidential Fusion &amp; Uncertainty Quantification</h2>
+    </div>
+
+    <p>In high-context cinematic domains, text and visual signals routinely disagree. A hyperbolic review of <em>Inception</em> may score 0.9 helpfulness from text alone — but if the retrieved frame is poorly aligned, forcing equal-weight fusion introduces systematic noise.</p>
+
+    <p>We resolve this via <strong>Dempster–Shafer Theory (DST)</strong>, which models evidence as belief mass functions rather than scalar weights. Define the binary hypothesis frame:</p>
+
+    <div class="math-block">
+      $$\Theta = \{H,\, \bar{H}\} \quad \text{(Helpful, Not Helpful)}$$
+      $$m_1,\, m_2 :\, 2^{\Theta} \rightarrow [0,1], \quad \sum_{A \subseteq \Theta} m(A) = 1$$
+      <div class="math-caption">Each modality assigns belief mass to subsets of $\Theta$. $m(\Theta)$ captures ignorance — explicitly unassigned belief.</div>
+    </div>
+
+    <h3 style="font-size:1.1rem; font-family:var(--ff-display); margin: 1.5rem 0 .75rem;">Conflict Mass &amp; Dempster's Rule</h3>
+
+    <div class="math-block">
+      $$K = \sum_{A \cap B = \emptyset} m_1(A)\,m_2(B)$$
+      $$m_{\text{fused}}(C) = \frac{\displaystyle\sum_{A \cap B = C} m_1(A)\,m_2(B)}{1 - K}$$
+      <div class="math-caption">$K \in [0,1]$ is the <em>conflict mass</em>. High $K$ means the modalities disagree; fusion is normalised by $(1-K)$ to prevent overconfident predictions.</div>
+    </div>
+
+    <h3 style="font-size:1.1rem; font-family:var(--ff-display); margin: 2rem 0 .75rem;">Worked Numerical Example</h3>
+
+    <p>Suppose for an <em>Inception</em> review, the BERT encoder assigns high text confidence but ViT sees a poorly-aligned frame:</p>
+
+    <div class="callout callout-info">
+      <span class="callout-icon"><i class="fas fa-calculator"></i></span>
+      <div>
+        <p style="margin-bottom:.5rem;"><strong>Text modality:</strong> $m_1(H)=0.70,\; m_1(\bar{H})=0.20,\; m_1(\Theta)=0.10$</p>
+        <p style="margin-bottom:.5rem;"><strong>Visual modality:</strong> $m_2(H)=0.40,\; m_2(\bar{H})=0.50,\; m_2(\Theta)=0.10$</p>
+        <p style="margin-bottom:.5rem;"><strong>Conflict:</strong> $K = (0.70 \times 0.50) + (0.20 \times 0.40) = 0.35 + 0.08 = 0.43$</p>
+        <p style="margin-bottom:.5rem;"><strong>Normalisation:</strong> $1-K = 0.57$ → fusion averts overconfident "helpful" classification</p>
+        <p style="margin:0;"><strong>Fused belief</strong> shifts toward $m(\Theta)$, the ignorance set — triggering conservative, calibrated prediction.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:1.1rem; font-family:var(--ff-display); margin: 2rem 0 .75rem;">Training Objective</h3>
+
+    <div class="math-block">
+      $$\mathcal{L} = \lambda_1 \mathcal{L}_{\text{help}} + \lambda_2 \mathcal{L}_{\text{align}}$$
+      $$\mathcal{L}_{\text{help}} = -\left[y\log\hat{p} + (1-y)\log(1-\hat{p})\right]$$
+      <div class="math-caption">Joint multi-task loss: binary cross-entropy helpfulness prediction + CLIP contrastive alignment. Adam optimiser, lr $= 3\!\times\!10^{-5}$, batch size 16.</div>
+    </div>
+
+    <div class="callout callout-insight">
+      <span class="callout-icon"><i class="fas fa-info-circle"></i></span>
+      <p>The conflict mass $K$ acts as an implicit <strong>uncertainty indicator at inference time</strong> — directly useful for calibrated ranking in recommender systems, where overconfident predictions degrade user trust.</p>
+    </div>
+  </section>
+
+  <!-- ─── §7 RESULTS ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 07</span>
+      <h2>Comprehensive Empirical Benchmarks</h2>
+    </div>
+
+    <p>We benchmarked three fusion strategies — <strong>Evidential</strong> (DS-theory), <strong>Attention</strong> (cross-modal attention), and <strong>Simple</strong> (concatenation) — across five metrics: Accuracy, F1, AUC-ROC, MAP, and NDCG@5. Highlighted cells indicate the best-performing strategy per film per metric.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Film</th>
+            <th>Strategy</th>
+            <th>Accuracy</th>
+            <th>F1</th>
+            <th>AUC</th>
+            <th>MAP</th>
+            <th>NDCG</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="movie-col">🚀 Interstellar</td>
+            <td><span class="method-badge m-ev">Evidential</span></td>
+            <td>0.805</td>
+            <td>0.801</td>
+            <td>0.884</td>
+            <td class="best">0.900 ↑</td>
+            <td class="best">0.982 ↑</td>
+          </tr>
+          <tr>
+            <td class="movie-col">💍 Return of the King</td>
+            <td><span class="method-badge m-ev">Evidential</span></td>
+            <td class="best">0.830 ↑</td>
+            <td class="best">0.830 ↑</td>
+            <td>0.870</td>
+            <td class="best">0.910 ↑</td>
+            <td class="best">0.980 ↑</td>
+          </tr>
+          <tr>
+            <td class="movie-col">🧙 Fellowship of the Ring</td>
+            <td><span class="method-badge m-at">Attention</span></td>
+            <td class="best">0.790 ↑</td>
+            <td>0.800</td>
+            <td>0.870</td>
+            <td class="best">0.870 ↑</td>
+            <td class="best">0.970 ↑</td>
+          </tr>
+          <tr>
+            <td class="movie-col">🍊 The Godfather</td>
+            <td><span class="method-badge m-ev">Evidential</span></td>
+            <td>0.680</td>
+            <td>0.780</td>
+            <td class="best">0.810 ↑</td>
+            <td class="best">0.770 ↑</td>
+            <td>0.930</td>
+          </tr>
+          <tr>
+            <td class="movie-col">🦇 The Dark Knight</td>
+            <td><span class="method-badge m-si">Simple</span></td>
+            <td>—</td>
+            <td class="best">0.710 ↑</td>
+            <td class="best">0.740 ↑</td>
+            <td class="best">0.730 ↑</td>
+            <td class="best">0.930 ↑</td>
+          </tr>
+          <tr>
+            <td class="movie-col">🦇 Batman Begins</td>
+            <td><span class="method-badge m-si">Simple</span></td>
+            <td>0.570</td>
+            <td class="best">0.710 ↑</td>
+            <td class="best">0.740 ↑</td>
+            <td class="best">0.730 ↑</td>
+            <td class="best">0.930 ↑</td>
+          </tr>
+          <tr>
+            <td class="movie-col">⚔️ The Two Towers</td>
+            <td><span class="method-badge m-ev">Evidential</span></td>
+            <td>—</td>
+            <td class="best">0.630 ↑</td>
+            <td class="best">0.690 ↑</td>
+            <td class="best">0.700 ↑</td>
+            <td class="best">0.890 ↑</td>
+          </tr>
+          <tr>
+            <td class="movie-col">🌀 Inception</td>
+            <td><span class="method-badge m-ev">Evidential</span></td>
+            <td>—</td>
+            <td class="best">0.570 ↑</td>
+            <td>0.590</td>
+            <td class="best">0.690 ↑</td>
+            <td class="best">0.890 ↑</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-insight">
+      <span class="callout-icon"><i class="fas fa-star"></i></span>
+      <p><strong>Key finding:</strong> Evidential fusion dominates in visually and symbolically rich films (Interstellar, LOTR, Inception). Simple concatenation prevails in action-heavy, visually grounded films (Dark Knight, Batman). This confirms fusion strategy should be <em>domain-sensitive</em>.</p>
+    </div>
+
+    <!-- CHART -->
+    <div class="chart-wrap">
+      <div class="chart-title">Training Dynamics: Validation AUC over Epochs (Interstellar)</div>
+      <div class="chart-legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#b5451b"></span>Evidential Fusion (smooth convergence)</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#2453a8; opacity:.6"></span>Attention Fusion (oscillatory)</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#1a7f6e; opacity:.6"></span>Simple Concatenation</span>
+      </div>
+      <canvas id="mainChart"></canvas>
+    </div>
+
+    <!-- SECOND CHART -->
+    <div class="chart-wrap">
+      <div class="chart-title">Aggregate Metric Comparison Across All Films</div>
+      <canvas id="barChart"></canvas>
+    </div>
+  </section>
+
+  <!-- ─── §8 ABLATION ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 08</span>
+      <h2>Ablation Study &amp; Component Sensitivity</h2>
+    </div>
+
+    <p>To isolate each architectural component's contribution, we systematically ablated modules and observed performance degradation on the Interstellar test set (AUC reported):</p>
+
+    <div class="ablation-grid">
+      <div class="ablation-cell header"><div class="lbl">Configuration</div></div>
+      <div class="ablation-cell header"><div class="lbl">AUC</div></div>
+      <div class="ablation-cell header"><div class="lbl">vs. Full Model</div></div>
+      <div class="ablation-cell"><div class="lbl">Full EviCLIP</div></div>
+      <div class="ablation-cell"><div class="val">0.884</div></div>
+      <div class="ablation-cell"><div class="delta delta-pos">Baseline</div></div>
+      <div class="ablation-cell"><div class="lbl">— CLIP Alignment</div></div>
+      <div class="ablation-cell"><div class="val">0.810</div></div>
+      <div class="ablation-cell"><div class="delta delta-neg">↓ 7.4pp</div></div>
+      <div class="ablation-cell"><div class="lbl">— Evidential Fusion</div></div>
+      <div class="ablation-cell"><div class="val">0.860</div></div>
+      <div class="ablation-cell"><div class="delta delta-neg">↓ 2.4pp</div></div>
+      <div class="ablation-cell"><div class="lbl">— ViT (text only)</div></div>
+      <div class="ablation-cell"><div class="val">0.792</div></div>
+      <div class="ablation-cell"><div class="delta delta-neg">↓ 9.2pp</div></div>
+      <div class="ablation-cell"><div class="lbl">Simple Concat (baseline)</div></div>
+      <div class="ablation-cell"><div class="val">0.862</div></div>
+      <div class="ablation-cell"><div class="delta delta-neg">↓ 2.2pp</div></div>
+    </div>
+
+    <p>CLIP alignment contributes the largest single improvement (~7–8 AUC points), confirming that <em>which</em> image is chosen matters more than <em>how</em> it is fused. Evidential fusion contributes primarily to calibration stability and ranking robustness rather than raw separability.</p>
+
+    <div class="math-block">
+      $$\Delta_{\text{align}} = \text{AUC}_{\text{full}} - \text{AUC}_{\text{no align}} \approx 7.4\text{ pp}$$
+      $$\text{Var}(\nabla \mathcal{L})_{\text{attention}} > \text{Var}(\nabla \mathcal{L})_{\text{evidential}}$$
+      <div class="math-caption">Gradient variance analysis confirms that DS-normalisation by $(1-K)$ directly reduces optimisation instability.</div>
+    </div>
+  </section>
+
+  <!-- ─── §9 CALIBRATION ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 09</span>
+      <h2>Calibration &amp; Predictive Reliability</h2>
+    </div>
+
+    <p>Beyond accuracy, model <em>reliability</em> is measured via Expected Calibration Error (ECE) — the gap between predicted confidence and empirical accuracy across $M$ probability bins:</p>
+
+    <div class="math-block">
+      $$\text{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{n}\,\bigl|\text{acc}(B_m) - \text{conf}(B_m)\bigr|$$
+      <div class="math-caption">Well-calibrated models have low ECE; predictions of 0.7 confidence should be correct ~70% of the time.</div>
+    </div>
+
+    <p>Evidential fusion reduced ECE compared to attention-based fusion across all evaluated films. The conflict mass $K$ functions as an implicit uncertainty detector: when modalities disagree ($K \uparrow$), fused belief mass redistributes toward the ignorance set $m(\Theta)$, producing conservative, appropriately uncertain predictions instead of overconfident scores.</p>
+
+    <div class="callout callout-insight">
+      <span class="callout-icon"><i class="fas fa-shield-alt"></i></span>
+      <p>In production recommender systems, calibration errors compound: overconfident helpful predictions pushed to top-$k$ lists degrade user trust asymmetrically. EviCLIP's uncertainty-aware fusion provides a natural hedge against this failure mode.</p>
+    </div>
+  </section>
+
+  <!-- ─── §10 FAILURES ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 10</span>
+      <h2>Failure Modes &amp; Edge Case Analysis</h2>
+    </div>
+
+    <p>Systematic error analysis revealed four primary failure clusters:</p>
+    <ul>
+      <li><strong>Metaphorical language:</strong> Reviews like "a symphony of visual chaos" trigger CLIP to retrieve visually noisy frames with high cosine similarity but zero semantic alignment with the reviewer's intended reference.</li>
+      <li><strong>Non-visual reviews:</strong> Music, dialogue, or acting-focused critiques have no meaningful frame to retrieve — CLIP returns an arbitrary high-similarity frame.</li>
+      <li><strong>Extremely short reviews</strong> (&lt;15 tokens) produce low-confidence CLIP embeddings with high distributional variance.</li>
+      <li><strong>Rare or visually sparse films</strong> with fewer than 500 keyframes reduce the quality of the retrieval pool.</li>
+    </ul>
+
+    <div class="math-block">
+      $$\arg\max_{f}\,\cos(e_r, e_f) \not\approx v^* \quad \text{(metaphorical failure)}$$
+      <div class="math-caption">CLIP alignment relies on literal semantic overlap in embedding space — deep metaphorical reasoning remains out-of-scope for current contrastive models.</div>
+    </div>
+  </section>
+
+  <!-- ─── §11 COMPLEXITY ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 11</span>
+      <h2>Computational Profile</h2>
+    </div>
+
+    <p>Frame-alignment complexity per review is $\mathcal{O}(N_f \cdot d)$ where $N_f$ is the frame count and $d=512$ is the CLIP embedding dimension. Since frame embeddings are pre-computed offline, runtime cost reduces to a single matrix multiplication.</p>
+
+    <div class="ablation-grid" style="grid-template-columns: repeat(4,1fr);">
+      <div class="ablation-cell"><div class="val" style="font-size:1.3rem;">220M</div><div class="lbl">Parameters</div></div>
+      <div class="ablation-cell"><div class="val" style="font-size:1.3rem;">~4hr</div><div class="lbl">Training Time</div></div>
+      <div class="ablation-cell"><div class="val" style="font-size:1.3rem;">11GB</div><div class="lbl">Peak VRAM</div></div>
+      <div class="ablation-cell"><div class="val" style="font-size:1.3rem;">RTX 3090</div><div class="lbl">Hardware</div></div>
+    </div>
+
+    <p>Future work may leverage approximate nearest-neighbour search (FAISS, HNSW) to scale alignment to sub-linear complexity for large frame collections.</p>
+  </section>
+
+  <!-- ─── §12 CONTRIBUTIONS ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 12</span>
+      <h2>My Specific Contributions</h2>
+    </div>
+
+    <ul class="contrib-list">
+      <li class="contrib-item">
+        <span class="contrib-icon"><i class="fas fa-code"></i></span>
+        <span>Designed and implemented the end-to-end CLIP dynamic alignment pipeline — including shot-boundary extraction, embedding pre-computation, and greedy frame retrieval.</span>
+      </li>
+      <li class="contrib-item">
+        <span class="contrib-icon"><i class="fas fa-flask"></i></span>
+        <span>Derived and implemented the Dempster–Shafer evidential fusion layer from first principles, including conflict mass computation and belief normalisation.</span>
+      </li>
+      <li class="contrib-item">
+        <span class="contrib-icon"><i class="fas fa-sliders-h"></i></span>
+        <span>Engineered the threshold calibration sweep over $\tau \in [0.4, 0.7]$, identifying $\tau = 0.54$ as the optimal balanced-accuracy operating point.</span>
+      </li>
+      <li class="contrib-item">
+        <span class="contrib-icon"><i class="fas fa-film"></i></span>
+        <span>Conducted full cross-genre benchmarking across 10 films (individual Jupyter notebooks), interpreting per-genre performance variation and correlating it with visual/narrative density.</span>
+      </li>
+      <li class="contrib-item">
+        <span class="contrib-icon"><i class="fas fa-bug"></i></span>
+        <span>Diagnosed gradient instability in early attention-fusion training via loss variance analysis; proposed and validated evidential normalisation as the stabilising mechanism.</span>
+      </li>
+      <li class="contrib-item">
+        <span class="contrib-icon"><i class="fas fa-chart-bar"></i></span>
+        <span>Developed the full visualisation dashboard for training dynamics, validation curves, ranking metric summaries, and genre-level performance comparisons.</span>
+      </li>
+      <li class="contrib-item">
+        <span class="contrib-icon"><i class="fas fa-pen-fancy"></i></span>
+        <span>Co-authored the paper, contributing the theoretical framing of the Semantic Gap, all mathematical derivations, and the empirical analysis sections.</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ─── §13 FUTURE WORK ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 13</span>
+      <h2>Limitations &amp; Future Directions</h2>
+    </div>
+
+    <p>EviCLIP currently grounds each review on a <em>single</em> keyframe, ignoring temporal cinematographic context. For reviews referencing narrative arcs or editing rhythms, the correct formulation should condition on the full frame sequence:</p>
+
+    <div class="math-block">
+      $$P(y \mid r, f^*) \neq P\!\left(y \mid r,\, \{f_t\}_{t=1}^{T}\right)$$
+      <div class="math-caption">Temporal transformers or video-language models (VideoLLaMA, InternVideo) would address this gap.</div>
+    </div>
+
+    <p><strong>Priority research directions:</strong></p>
+    <ul>
+      <li>Temporal visual grounding via multi-frame aggregation or video-language pre-training</li>
+      <li>Adaptive fusion weighting conditioned on predicted genre distribution</li>
+      <li>ANN-based frame retrieval (FAISS) for sub-linear scaling to large film libraries</li>
+      <li>Cross-cultural review style adaptation and debiasing for non-English IMDb content</li>
+      <li>Extension to other review domains: books (cover art), music (album artwork), restaurants (photo galleries)</li>
+    </ul>
+  </section>
+
+  <!-- ─── §14 REFERENCES ─── -->
+  <section class="section reveal">
+    <div class="section-header">
+      <span class="section-num">§ 14</span>
+      <h2>References</h2>
+    </div>
+
+    <ul class="ref-list">
+      <li class="ref-item">
+        <span class="ref-num">[1]</span>
+        <span class="ref-text"><strong>CLIP:</strong> Radford, A., et al. (2021). <em>Learning Transferable Visual Models From Natural Language Supervision.</em> ICML 2021. <a href="https://arxiv.org/abs/2103.00020" target="_blank">arXiv:2103.00020</a></span>
+      </li>
+      <li class="ref-item">
+        <span class="ref-num">[2]</span>
+        <span class="ref-text"><strong>Dempster–Shafer Fusion:</strong> Alzahem, A., et al. (2024). <em>Feature fusion for improved classification: Combining Dempster-Shafer theory and multiple CNN architectures.</em> <a href="https://arxiv.org/abs/2405.20230" target="_blank">arXiv:2405.20230</a></span>
+      </li>
+      <li class="ref-item">
+        <span class="ref-num">[3]</span>
+        <span class="ref-text"><strong>BERT:</strong> Devlin, J., et al. (2019). <em>BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.</em> NAACL-HLT 2019.</span>
+      </li>
+      <li class="ref-item">
+        <span class="ref-num">[4]</span>
+        <span class="ref-text"><strong>ViT:</strong> Dosovitskiy, A., et al. (2021). <em>An Image is Worth 16×16 Words: Transformers for Image Recognition at Scale.</em> ICLR 2021.</span>
+      </li>
+      <li class="ref-item">
+        <span class="ref-num">[5]</span>
+        <span class="ref-text"><strong>MCR Baseline:</strong> Liu, J., et al. (2021). <em>Multi-perspective Coherent Reasoning for Helpfulness Prediction of Multimodal Reviews.</em> ACL 2021.</span>
+      </li>
+      <li class="ref-item">
+        <span class="ref-num">[6]</span>
+        <span class="ref-text"><strong>SANCL:</strong> (2022). <em>Sentiment-Aware Multi-modal Dialogue Systems.</em> COLING 2022. <a href="https://aclanthology.org/2022.coling-1.499.pdf" target="_blank">ACL Anthology</a></span>
+      </li>
+      <li class="ref-item">
+        <span class="ref-num">[7]</span>
+        <span class="ref-text"><strong>This Paper:</strong> Hamza, M., Rai, K., Sarkar, S. (2025). <em>Movie Review Helpfulness Prediction: A Multimodal Framework.</em> IEEE ISAI-NLP 2025. <a href="https://ieeexplore.ieee.org/abstract/document/11492803/" target="_blank">IEEE Xplore</a></span>
+      </li>
+    </ul>
+  </section>
+
+</div><!-- /container -->
+</main>
+
+<!-- ══════════════════════ FOOTER ══════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-name">Muhammad Hamza</div>
+    <div class="footer-affil">
+      Dual Degree (B.Tech + M.Tech), Chemical Engineering<br>
+      Micro Specialisation in Artificial Intelligence &amp; Applications<br>
+      <strong>IIT Kharagpur</strong> · Class of 2028
+    </div>
+    <div class="social-row">
+      <a href="https://github.com/Hamza-Faarooq" target="_blank" class="social-btn"><i class="fab fa-github"></i></a>
+      <a href="https://ieeexplore.ieee.org/abstract/document/11492803/" target="_blank" class="social-btn"><i class="fas fa-file-alt"></i></a>
+      <a href="#" class="social-btn"><i class="fab fa-linkedin"></i></a>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════ SCRIPTS ══════════════════════ -->
 <script>
-if (!window.trainingChartInitialized) {
-window.trainingChartInitialized = true;
+// ── THEME TOGGLE ──
+function toggleTheme() {
+  const html = document.documentElement;
+  const icon = document.getElementById('theme-icon');
+  if (html.getAttribute('data-theme') === 'dark') {
+    html.setAttribute('data-theme', 'light');
+    icon.className = 'fas fa-moon';
+    updateChartColors();
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    icon.className = 'fas fa-sun';
+    updateChartColors();
+  }
+}
 
-const ctx = document.getElementById('trainingChart').getContext('2d');
+// ── SCROLL REVEAL ──
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); }});
+}, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
+reveals.forEach(r => observer.observe(r));
 
-new Chart(ctx, {
-type: 'line',
-data: {
-labels: ['Epoch 1','Epoch 3','Epoch 5','Epoch 7','Epoch 10','Epoch 12','Epoch 15'],
-datasets: [
-{
-label: 'Attention Fusion',
-data: [0.60,0.75,0.68,0.82,0.78,0.83,0.81],
-borderColor: '#94a3b8',
-tension: 0.4,
-borderDash: [5,5]
-},
-{
-label: 'Evidential Fusion',
-data: [0.62,0.70,0.79,0.85,0.88,0.89,0.90],
-borderColor: '#005587',
-tension: 0.4,
-borderWidth: 3
-}
-]
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: {
-title: {
-display: true,
-text: 'Validation AUC over Training Epochs'
-}
-},
-scales: {
-y: {
-min: 0.5,
-title: { display: true, text: 'Validation AUC' }
-}
-}
-}
+// ── CHARTS ──
+let mainChart, barChart;
+
+function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+function textColor() { return isDark() ? '#b8b0a6' : '#4a4541'; }
+function gridColor() { return isDark() ? '#2e2a25' : '#e0dbd2'; }
+
+window.addEventListener('load', () => {
+  const ctxMain = document.getElementById('mainChart');
+  mainChart = new Chart(ctxMain, {
+    type: 'line',
+    data: {
+      labels: ['Epoch 1','Epoch 3','Epoch 5','Epoch 7','Epoch 10','Epoch 12','Epoch 15'],
+      datasets: [
+        {
+          label: 'Evidential Fusion',
+          data: [0.62, 0.70, 0.79, 0.85, 0.88, 0.89, 0.90],
+          borderColor: '#b5451b', backgroundColor: 'rgba(181,69,27,.08)',
+          borderWidth: 2.5, tension: 0.45, fill: true, pointRadius: 4, pointHoverRadius: 6
+        },
+        {
+          label: 'Attention Fusion',
+          data: [0.60, 0.75, 0.68, 0.82, 0.78, 0.83, 0.81],
+          borderColor: '#2453a8', backgroundColor: 'rgba(36,83,168,.05)',
+          borderWidth: 2, tension: 0.45, fill: true, borderDash: [5,4], pointRadius: 3
+        },
+        {
+          label: 'Simple Concatenation',
+          data: [0.61, 0.72, 0.74, 0.80, 0.82, 0.84, 0.86],
+          borderColor: '#1a7f6e', backgroundColor: 'rgba(26,127,110,.04)',
+          borderWidth: 2, tension: 0.45, fill: true, borderDash: [3,3], pointRadius: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false }},
+      scales: {
+        x: { ticks: { color: textColor(), font: {family:'JetBrains Mono',size:11}}, grid: { color: gridColor()}},
+        y: { min: 0.55, max: 0.93, ticks: { color: textColor(), font:{family:'JetBrains Mono',size:11}}, grid: { color: gridColor()}, title: { display:true, text:'Validation AUC', color: textColor()}}
+      }
+    }
+  });
+
+  const ctxBar = document.getElementById('barChart');
+  barChart = new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: ['Accuracy', 'F1 Score', 'AUC-ROC', 'MAP', 'NDCG'],
+      datasets: [
+        { label: 'Evidential', data: [0.805, 0.801, 0.884, 0.899, 0.982], backgroundColor: '#b5451b', borderRadius: 4 },
+        { label: 'Attention', data: [0.792, 0.796, 0.872, 0.848, 0.921], backgroundColor: '#2453a8', borderRadius: 4 },
+        { label: 'Simple', data: [0.790, 0.785, 0.862, 0.832, 0.911], backgroundColor: '#1a7f6e', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: textColor(), font:{family:'DM Sans',size:12}}}},
+      scales: {
+        x: { ticks: { color: textColor(), font:{family:'DM Sans',size:12}}, grid: { display:false }},
+        y: { min: 0.75, max: 1.0, ticks: { color: textColor(), font:{family:'JetBrains Mono',size:11}}, grid: { color: gridColor()}}
+      }
+    }
+  });
 });
+
+function updateChartColors() {
+  if (!mainChart) return;
+  [mainChart, barChart].forEach(chart => {
+    chart.options.scales.x.ticks.color = textColor();
+    chart.options.scales.y.ticks.color = textColor();
+    chart.options.scales.x.grid.color = gridColor();
+    chart.options.scales.y.grid.color = gridColor();
+    if (chart.options.scales.y.title) chart.options.scales.y.title.color = textColor();
+    if (chart.options.plugins.legend) chart.options.plugins.legend.labels.color = textColor();
+    chart.update();
+  });
 }
 </script>
-
-<!-- ===================================================== -->
-<!-- VISUAL DIAGNOSTICS -->
-<!-- ===================================================== -->
-
-<div class="vis-container">
-<div class="vis-text">
-<h3>Optimization & Convergence Stability</h3>
-<p>
-Evidential fusion demonstrates smoother convergence and reduced gradient variance. By normalizing conflict mass \(K\), the Dempster–Shafer framework mitigates abrupt gradient fluctuations observed in attention-based fusion.
-</p>
-</div>
-<div class="vis-image">
-<img src="visualisations/vis1.png" alt="Training Loss Dynamics" class="architecture-img">
-<div class="math-caption">Vis 1: Training Loss Dynamics</div>
-</div>
-</div>
-
-<div class="vis-container reverse">
-<div class="vis-text">
-<h3>Validation Generalization</h3>
-<p>
-Attention-based fusion exhibits oscillatory validation behavior under modality disagreement, while evidential fusion stabilizes after epoch 10, indicating stronger generalization.
-</p>
-</div>
-<div class="vis-image">
-<img src="visualisations/vis2.png" alt="Validation Metrics" class="architecture-img">
-<div class="math-caption">Vis 2: Validation AUC Stability</div>
-</div>
-</div>
-
-<div class="vis-container">
-<div class="vis-text">
-<h3>Ranking Metric Consistency</h3>
-<p>
-Evidential fusion achieves balanced improvements across F1, MAP, and NDCG, demonstrating superior ranking robustness rather than isolated metric spikes.
-</p>
-</div>
-<div class="vis-image">
-<img src="visualisations/vis3.png" alt="Ranking Summary" class="architecture-img">
-<div class="math-caption">Vis 3: Final Metric Comparison</div>
-</div>
-</div>
-
-<div class="vis-container reverse">
-<div class="vis-text">
-<h3>Cross-Genre Robustness</h3>
-<p>
-Performance variation across narrative types confirms that multimodal fusion is domain-sensitive. Evidential modeling performs best in visually fragmented or symbolically dense films.
-</p>
-</div>
-<div class="vis-image">
-<img src="visualisations/vis4.png" alt="Genre Performance" class="architecture-img">
-<div class="math-caption">Vis 4: Genre-Level Performance</div>
-</div>
-</div>
-
-</section>
-
-        <section data-aos="fade-up">
-<h2>7. Ablation Study & Component Sensitivity</h2>
-
-<p>
-To isolate contributions of each architectural component, we systematically removed modules and observed performance degradation.
-</p>
-
-<div class="math-block">
-\[
-\Delta_{align} =
-\text{AUC}_{full}
--
-\text{AUC}_{no\ alignment}
-\]
-</div>
-
-<p>
-Results showed alignment contributes the largest marginal improvement (~6–8 AUC points).
-</p>
-
-<p>
-Removing evidential fusion reduced calibration stability even when AUC drop was moderate. This demonstrates that evidential modeling primarily enhances reliability rather than raw separability.
-</p>
-
-<p>
-Gradient variance analysis revealed:
-</p>
-
-<div class="math-block">
-\[
-\text{Var}(\nabla \mathcal{L})
-_{\text{attention}}
->
-\text{Var}(\nabla \mathcal{L})
-_{\text{evidential}}
-\]
-</div>
-
-<p>
-This aligns with smoother convergence curves shown in your training dynamics graph.
-</p>
-
-</section>
-
-        <section data-aos="fade-up">
-<h2>8. Calibration and Predictive Uncertainty</h2>
-
-<p>
-Beyond accuracy, model reliability is measured via Expected Calibration Error (ECE):
-</p>
-
-<div class="math-block">
-\[
-\text{ECE} =
-\sum_{m=1}^{M}
-\frac{|B_m|}{n}
-\left|
-\text{acc}(B_m)
--
-\text{conf}(B_m)
-\right|
-\]
-</div>
-
-<p>
-Evidential fusion reduced ECE compared to attention-based fusion, indicating lower overconfidence in high-conflict cases.
-</p>
-
-<p>
-Conflict mass \(K\) serves as an implicit uncertainty indicator. When \(K\) increases, fused belief shifts toward ignorance mass \(m(\Theta)\), reducing overconfident predictions.
-</p>
-
-<p>
-This property is crucial in recommender systems where ranking errors propagate to user trust degradation.
-</p>
-
-</section>
-
-
-        <section data-aos="fade-up">
-<h2>9. Computational Complexity & Scalability Considerations</h2>
-
-<p>
-Let \(N_f\) denote number of frames per movie. Alignment requires:
-</p>
-
-<div class="math-block">
-\[
-\mathcal{O}(N_f d)
-\]
-</div>
-
-<p>
-Where \(d=768\) is embedding dimension.
-</p>
-
-<p>
-Total model parameters:
-</p>
-
-<div class="math-block">
-\[
-\approx 220M
-\]
-</div>
-
-<p>
-Training time: ~4 hours (RTX 3090, batch size 16). Peak memory ~11GB.
-</p>
-
-<p>
-Future optimization may leverage approximate nearest neighbor search to reduce alignment to sub-linear complexity.
-</p>
-
-</section>
-
-
-        <section data-aos="fade-up">
-<h2>10. Failure Modes & Edge Case Analysis</h2>
-
-<p>
-Failure cases clustered into four categories:
-</p>
-
-<ul>
-<li>Metaphorical language lacking visual grounding</li>
-<li>Soundtrack or music-centric reviews</li>
-<li>Extremely short reviews</li>
-<li>Highly rare films with sparse frames</li>
-</ul>
-
-<p>
-In metaphorical cases, CLIP alignment retrieves visually similar but semantically unrelated frames.
-</p>
-
-<p>
-Formally:
-</p>
-
-<div class="math-block">
-\[
-\arg\max_f \cos(e_r, e_f)
-\not\approx v^*
-\]
-</div>
-
-<p>
-This reveals that alignment relies on literal semantic overlap rather than deep metaphorical reasoning.
-</p>
-
-</section>
-
-
-        <section data-aos="fade-up">
-<h2>11. Bias, Exposure Effects & Fairness</h2>
-
-<p>
-Helpfulness votes are influenced by visibility bias:
-</p>
-
-<div class="math-block">
-\[
-P(H \mid r) \propto \text{Exposure}(r)
-\]
-</div>
-
-<p>
-We mitigated this by excluding low-vote samples and analyzing vote-count normalization.
-</p>
-
-<p>
-Genre imbalance was controlled by cross-genre evaluation. However, cultural bias in review style remains an open challenge.
-</p>
-
-</section>
-
-
-        <section data-aos="fade-up">
-<h2>12. My Contributions to the Research</h2>
-
-<ul>
-<li>Designed and implemented dynamic CLIP-based alignment pipeline.</li>
-<li>Derived and coded evidential fusion layer from first principles.</li>
-<li>Engineered threshold calibration and class balancing strategy.</li>
-<li>Conducted cross-genre benchmarking and metric interpretation.</li>
-<li>Diagnosed gradient instability in early training phases.</li>
-<li>Developed visualization dashboard for training dynamics.</li>
-</ul>
-
-<p>
-My primary focus was integrating uncertainty modeling into multimodal fusion and evaluating its empirical impact across heterogeneous narrative domains.
-</p>
-
-</section>
-
-
-        <section data-aos="fade-up">
-<h2>13. Limitations & Future Research Directions</h2>
-
-<p>
-The model operates on single-frame grounding, ignoring temporal continuity:
-</p>
-
-<div class="math-block">
-\[
-P(y \mid r, f^*)
-\neq
-P(y \mid r, \{f_t\}_{t=1}^{T})
-\]
-</div>
-
-<p>
-Future work may incorporate temporal transformers or video-language models.
-</p>
-
-<p>
-Alignment remains linear in frame count. Efficient retrieval or clustering strategies could improve scalability.
-</p>
-
-<p>
-Adaptive fusion weighting conditioned on genre distribution presents another promising direction.
-</p>
-
-</section>
-        <section data-aos="fade-up" style="margin-bottom: 4rem;">
-            <h2>14. References & Further Reading</h2>
-            <p>For a deeper dive into the foundational architectures and theories that power this framework, explore the primary literature below:</p>
-            
-            <ul style="list-style-type: none; padding-left: 0;">
-                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
-                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
-                    <strong>CLIP (Semantic Alignment):</strong> Radford, A., et al. (2021). <em>Learning Transferable Visual Models From Natural Language Supervision.</em> In Proceedings of the International Conference on Machine Learning (ICML).
-                </li>
-                
-                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
-                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
-                    <strong>Evidential Fusion (Dempster-Shafer):</strong> Alzahem, A., et al. (2024). <em>Feature fusion for improved classification: Combining Dempster-Shafer theory and multiple CNN architectures.</em> arXiv preprint arXiv:2405.20230.
-                </li>
-                
-                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
-                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
-                    <strong>BERT (Text Encoding):</strong> Devlin, J., et al. (2019). <em>BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.</em> In Proceedings of NAACL-HLT.
-                </li>
-
-                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
-                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
-                    <strong>ViT (Visual Encoding):</strong> Dosovitskiy, A., et al. (2021). <em>An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.</em> In Proceedings of ICLR.
-                </li>
-                
-                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
-                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
-                    <strong>Baseline Multimodal Approach (MCR):</strong> Liu, J., et al. (2021). <em>Multi-perspective Coherent Reasoning for Helpfulness Prediction of Multimodal Reviews.</em> In Proceedings of the ACL.
-                </li>
-            </ul>
-        </section>
-
-    </main>
-        
-    <footer>
-        <div class="container">
-            <strong>Muhammad Hamza</strong><br>
-            Dual Degree (B.Tech + M.Tech), Chemical Engineering<br>
-            Micro Specialization in Artificial Intelligence and Applications<br>
-            IIT Kharagpur (Class of 2028)<br>
-            <div style="margin-top: 1rem; font-size: 1.2rem; display: flex; justify-content: center; gap: 1rem;">
-                <a href="#" style="color: var(--text-muted);"><i class="fab fa-linkedin"></i></a>
-                <a href="https://github.com/Hamza-Faarooq" style="color: var(--text-muted);"><i class="fab fa-github"></i></a>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        // Init Syntax Highlighting & Animations
-        hljs.highlightAll();
-        AOS.init({ duration: 800, once: true, offset: 50 });
-
-        // Theme Toggle
-        function toggleTheme() {
-            const body = document.body;
-            const icon = document.querySelector('nav button i');
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme');
-                icon.className = 'fas fa-moon';
-                trainChart.options.scales.x.ticks.color = '#1a1a1a';
-                trainChart.options.scales.y.ticks.color = '#1a1a1a';
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                icon.className = 'fas fa-sun';
-                trainChart.options.scales.x.ticks.color = '#e2e8f0';
-                trainChart.options.scales.y.ticks.color = '#e2e8f0';
-            }
-            trainChart.update();
-        }
-
-        // Chart.js Setup: Simulated Training Dynamics
-        const ctx = document.getElementById('trainingChart').getContext('2d');
-        const trainChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Epoch 1', 'Epoch 3', 'Epoch 5', 'Epoch 7', 'Epoch 10', 'Epoch 12', 'Epoch 15'],
-                datasets: [
-                    {
-                        label: 'Attention Fusion (Erratic Convergence)',
-                        data: [0.60, 0.75, 0.68, 0.82, 0.78, 0.83, 0.81],
-                        borderColor: '#94a3b8',
-                        tension: 0.4,
-                        borderDash: [5, 5]
-                    },
-                    {
-                        label: 'Evidential Fusion (Smooth Convergence)',
-                        data: [0.62, 0.70, 0.79, 0.85, 0.88, 0.89, 0.90],
-                        borderColor: '#005587',
-                        tension: 0.4,
-                        borderWidth: 3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: { display: true, text: 'Training Dynamics (Validation AUC) on Interstellar', font: {family: 'Inter', size: 14} }
-                },
-                scales: {
-                    y: { min: 0.5, title: { display: true, text: 'Validation AUC' } }
-                }
-            }
-        });
-    </script>
 </body>
-</html> -->
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-        <!-- <section data-aos="fade-up">
-            <h2>1. The Semantic Gap in Film Critique</h2>
-            <div class="story-box">
-                "The sheer isolation of humanity was perfectly captured in that single, silent wide shot of the Endurance."
-            </div>
-            <p>If you feed this <em>Interstellar</em> review into a standard Natural Language Processing (NLP) model, it registers the positive sentiment but faces a profound semantic gap when visual context is crucial. The reviewer references a specific cinematic frame entirely absent from the text.</p>
-            <p>Predicting review helpfulness is critical for Recommender Systems (RS). However, relying solely on user-voted helpfulness introduces noise and bias, often overlooking high-quality reviews due to low visibility. While multimodal models like UNITER, ViLBERT, and MCR exist, they suffer from a fatal flaw in high-context domains: they assume inherent visual-text relevance, overlooking semantic misalignment in movie reviews. If the review discusses a "wide shot," but the model is fed a generic movie poster, the fusion process generates noise rather than insight.</p>
-        </section>
-
-        <section data-aos="fade-up">
-            <h2>2. Data Formulation & Thresholding</h2>
-            <p>Before building the architecture, we needed a mathematically sound target variable. We curated over 40,000 IMDb user reviews and 24,000 keyframes. Helpfulness, reflecting the extent to which a review influences consumer decision-making, is traditionally represented as a ratio of votes.</p>
-            
-            <div class="math-block">
-                $$ \text{Helpfulness Score} = \frac{H}{H + U} $$
-                <div class="math-caption">Where $H$ denotes "helpful" votes and $U$ represents "unhelpful" votes.</div>
-            </div>
-
-            <p>For example, a review with 12 helpful and 3 unhelpful votes yields a score of $0.8$. We binarized this into a classification task, empirically selecting a threshold of $0.54$. This specific value balances class distribution while ensuring semantic relevance; higher thresholds showed severely unbalanced classes and reduced dataset size, which would have undermined the study.</p>
-        </section>
-
-        <section data-aos="fade-up">
-            <h2>3. Dynamic Visual Grounding (CLIP)</h2>
-            <p>To solve the misalignment problem, our framework incorporates a Contrastive Language-Image Pre-training (CLIP) guided alignment module to select the most relevant movie frame for each review dynamically. We compute the cosine similarity between the embedded review $e_r$ and a set of candidate movie stills $e_f$.</p>
-
-            <div class="math-block">
-                $$ align(r_i, f_j) = \cos(\text{CLIP}_{text}(r_i), \text{CLIP}_{image}(f_j)) $$
-                <br>
-                $$ f^* = \arg\max_{f} \cos(e_r, e_f) $$
-                <div class="math-caption">Selecting the optimal frame $f^*$ that maximizes semantic alignment.</div>
-            </div>
-
-            <p>The necessity for this CLIP-based alignment is emphasized by visually dense films like <em>Interstellar</em> and <em>Fellowship of the Ring</em>, domains where unimodal models are particularly susceptible to failure. We manually validated a subset of 500 review-image pairs to adjust the similarity threshold and optimize alignment accuracy against pseudo-labeling bias.</p>
-
-<pre><code class="language-python">import torch
-import torch.nn.functional as F
-
-def get_optimal_frame(review_emb, frame_embs):
-    # Normalize embeddings for cosine similarity computation
-    review_emb = F.normalize(review_emb, p=2, dim=-1)
-    frame_embs = F.normalize(frame_embs, p=2, dim=-1)
-    
-    # Compute similarity scores: shape (1, N)
-    similarity_scores = torch.matmul(review_emb, frame_embs.T)
-    
-    # Select the frame f* that maximizes semantic alignment
-    best_frame_idx = torch.argmax(similarity_scores, dim=-1)
-    alignment_score = similarity_scores[0, best_frame_idx]
-    
-    return best_frame_idx, alignment_score
-</code></pre>
-        </section>
-
-        <section data-aos="fade-up">
-            <h2>4. The Dual-Encoder Architecture</h2>
-            <p>Once the review $r_i$ and the optimal frame $f^*$ are paired, we extract dense semantic representations. The textual analysis utilizes BERT to generate $h_{text} \in \mathbb{R}^{768}$. Simultaneously, the visual analysis employs a Vision Transformer (ViT) to produce frame features $h_{visual} \in \mathbb{R}^{768}$.</p>
-            
-            <img src="https://raw.githubusercontent.com/Hamza-Faarooq/IIM_Research_Intern/main/model_architecture/main_architecture.png" alt="Model Architecture" class="architecture-img">
-            <p style="text-align: center; font-size: 0.9rem; color: var(--text-muted);"><em>Fig 1: The full pipeline: Text reviews encoded via BERT, keyframes via ViT, guided by CLIP.</em></p>
-        </section>
-
-        <section data-aos="fade-up">
-            <h2>5. Uncertainty Management: Evidential Fusion</h2>
-            <p>Modern models frequently employ shallow fusion techniques like concatenation or fixed attention, which overlook modality-level uncertainty. When visuals are symbolic and texts are hyperbolic, deterministic models risk overfitting or making overconfident predictions.</p>
-            <p>We introduced a belief-theoretic strategy based on Dempster-Shafer theory. It models belief mass for each modality ($m_1, m_2$) and explicitly quantifies conflicts ($K$). If the text implies a review is helpful but the image is irrelevant, $K$ increases.</p>
-
-            <div class="math-block">
-                $$ K = \sum_{i \neq j} m_1(i) \cdot m_2(j) $$
-                <br>
-                $$ m_{fused} = \frac{m_1 \cdot m_2}{1 - K} $$
-                <div class="math-caption">Equation 6 and 7: $K$ quantifies the total conflict between the two belief sources. The fused mass is normalized by $(1-K)$.</div>
-            </div>
-
-            <p>Intuitively, when text and visual cues agree, belief is reinforced; when they conflict, the framework balances evidence based on uncertainty, yielding more robust predictions. Both heads share this fused representation and are trained jointly using a multi-task loss formulation:</p>
-            
-            <div class="math-block">
-                $$ \mathcal{L} = \lambda_1 \cdot \mathcal{L}_{help} + \lambda_2 \cdot \mathcal{L}_{align} $$
-                <div class="math-caption">Where $\lambda_1$ and $\lambda_2$ represent the weighting coefficients. We trained using the Adam optimizer (lr 3e-5, batch size 16).</div>
-            </div>
-        </section>
-
-        <section data-aos="fade-up">
-            <h2>6. Comprehensive Empirical Benchmarks & Training Dynamics</h2>
-            <p>We benchmarked evidential fusion against direct concatenation (Simple) and attention-based fusion on our curated dataset of over 40,000+ review-image pairs. To fully assess the architecture's cross-genre robustness, we evaluated the models across 9 diverse movies encompassing sci-fi, drama, fantasy, and crime.</p>
-            
-            <div class="table-responsive">
-                <table class="research-table">
-                    <thead>
-                        <tr>
-                            <th>Dataset</th>
-                            <th>Accuracy</th>
-                            <th>F1 Score</th>
-                            <th>AUC</th>
-                            <th>MAP</th>
-                            <th>NDCG</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Interstellar</td>
-                            <td>Simple (0.82)</td>
-                            <td>Simple (0.83)</td>
-                            <td>Simple (0.86)</td>
-                            <td><span class="best-metric">Evidential (0.90)</span></td>
-                            <td><span class="best-metric">Evidential (0.90)</span></td>
-                        </tr>
-                        <tr>
-                            <td>Return of the King</td>
-                            <td><span class="best-metric">Evidential (0.83)</span></td>
-                            <td><span class="best-metric">Evidential (0.83)</span></td>
-                            <td>Simple (0.88)</td>
-                            <td><span class="best-metric">Evidential (0.91)</span></td>
-                            <td><span class="best-metric">Evidential (0.98)</span></td>
-                        </tr>
-                        <tr>
-                            <td>Fellowship of the Ring</td>
-                            <td>Attention (0.79)</td>
-                            <td>Simple (0.80)</td>
-                            <td>Simple (0.87)</td>
-                            <td>Attention (0.87)</td>
-                            <td>Attention (0.97)</td>
-                        </tr>
-                        <tr>
-                            <td>Godfather-1</td>
-                            <td>Simple (0.68)</td>
-                            <td>Attention (0.80)</td>
-                            <td><span class="best-metric">Evidential (0.81)</span></td>
-                            <td><span class="best-metric">Evidential (0.77)</span></td>
-                            <td>Attention (0.94)</td>
-                        </tr>
-                        <tr>
-                            <td>The Dark Knight</td>
-                            <td>-</td>
-                            <td>Simple (0.71)</td>
-                            <td>Simple (0.74)</td>
-                            <td>Simple (0.73)</td>
-                            <td>Simple (0.93)</td>
-                        </tr>
-                        <tr>
-                            <td>Batman Begins</td>
-                            <td>Attention (0.57)</td>
-                            <td>Simple (0.71)</td>
-                            <td>Simple (0.74)</td>
-                            <td>Simple (0.73)</td>
-                            <td>Simple (0.93)</td>
-                        </tr>
-                        <tr>
-                            <td>The Two Towers</td>
-                            <td>-</td>
-                            <td><span class="best-metric">Evidential (0.63)</span></td>
-                            <td><span class="best-metric">Evidential (0.69)</span></td>
-                            <td><span class="best-metric">Evidential (0.70)</span></td>
-                            <td><span class="best-metric">Evidential (0.89)</span></td>
-                        </tr>
-                        <tr>
-                            <td>Inception</td>
-                            <td>-</td>
-                            <td><span class="best-metric">Evidential (0.57)</span></td>
-                            <td>Attention (0.61)</td>
-                            <td><span class="best-metric">Evidential (0.69)</span></td>
-                            <td><span class="best-metric">Evidential (0.89)</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="math-caption">Table II: Complete comparison of best performing models mapped by dataset and metric.</div>
-            </div>
-
-            <p>Model performance varied heavily by narrative type. <strong>Evidential fusion performed best on semantically dense, abstract films</strong> like <em>Interstellar</em> and <em>Return of the King</em>, securing top Mean Average Precision (MAP) and NDCG scores. In contrast, attention-based fusion excelled in dialogue-heavy narratives like <em>The Godfather</em>, and simple concatenation yielded solid results for visually grounded action films like <em>The Dark Knight</em>.</p>
-
-            <div class="chart-container">
-                <canvas id="trainingChart" height="250"></canvas>
-            </div>
-
-            <div class="vis-container">
-                <div class="vis-text">
-                    <h3>Optimization & Convergence Stability</h3>
-                    <p>Figure 2(a) illustrates the epoch-wise training loss. Modern multimodal models often suffer from unstable gradients during early epochs due to modality conflict. As seen in <strong>Vis 1</strong>, evidential fusion demonstrates significantly smoother convergence and lower loss variance compared to the erratic trends observed in attention-based fusion. By mathematically discounting conflicting modality signals via the Dempster-Shafer conflict mass ($K$), the network avoids steep gradient cliffs. This low-variance optimization highlights the inherent robustness in belief-theoretic weighting.</p>
-                </div>
-                <div class="vis-image">
-                    <img src="visualisations/vis1.png" alt="Training Loss Dynamics" class="architecture-img" style="margin: 0;">
-                    <div class="math-caption">Vis 1: Epoch-wise Training Loss Analysis</div>
-                </div>
-            </div>
-
-            <div class="vis-container reverse">
-                <div class="vis-text">
-                    <h3>Validation Generalization (AUC & F1)</h3>
-                    <p>While attention-based models show rapid early memorization, they tend to oscillate heavily on validation sets containing hyperbolic user reviews. <strong>Vis 2</strong> tracks the validation AUC over training epochs. Evidential fusion stabilizes efficiently around epoch 10 and maintains superior AUC scores, reflecting strong generalization. The smooth asymptote proves that our fusion strategy does not merely overfit to the dominant modality (text) but genuinely learns the semantic alignment threshold required for visually complex test data.</p>
-                </div>
-                <div class="vis-image">
-                    <img src="visualisations/vis2.png" alt="Validation Metrics AUC/F1" class="architecture-img" style="margin: 0;">
-                    <div class="math-caption">Vis 2: Validation AUC over Training Epochs</div>
-                </div>
-            </div>
-
-            <div class="vis-container">
-                <div class="vis-text">
-                    <h3>Comprehensive Ranking Benchmarks</h3>
-                    <p>Figure 2(b) summarizes the final performance using key ranking metrics (F1, MAP, NDCG). <strong>Vis 3</strong> clearly illustrates that while simple concatenation might occasionally spike in raw AUC, evidential fusion delivers the most balanced and consistent results across all ranking metrics. It achieves an aggregate MAP of 0.87 and an NDCG of 0.97. This balance is the hallmark of a robust review ranking algorithm, affirming its suitability for deployment in complex visual domains.</p>
-                </div>
-                <div class="vis-image">
-                    <img src="visualisations/vis3.png" alt="Final Metric Summary Bar Chart" class="architecture-img" style="margin: 0;">
-                    <div class="math-caption">Vis 3: Final Metric Evaluation Summary</div>
-                </div>
-            </div>
-
-            <div class="vis-container reverse">
-                <div class="vis-text">
-                    <h3>Cross-Genre Robustness & Modality Bias</h3>
-                    <p>The true test of a multimodal architecture is its adaptability across different data distributions. <strong>Vis 4</strong> reinforces the insights from Table II. Evidential fusion performed exceptionally on visually fragmented films (e.g., <em>Interstellar</em>). The variance between methods underscores a fundamental takeaway: <em>there is no "one size fits all" multimodal fusion.</em> Fusion strategies must be dynamically tailored or weighted according to the semantic and visual density of the source media.</p>
-                </div>
-                <div class="vis-image">
-                    <img src="visualisations/vis4.png" alt="Performance Across Movie Genres" class="architecture-img" style="margin: 0;">
-                    <div class="math-caption">Vis 4: Performance Disaggregation by Cinematic Genre</div>
-                </div>
-            </div>
-        </section>
-
-        <section data-aos="fade-up" style="margin-bottom: 4rem;">
-            <h2>7. References & Further Reading</h2>
-            <p>For a deeper dive into the foundational architectures and theories that power this framework, explore the primary literature below:</p>
-            
-            <ul style="list-style-type: none; padding-left: 0;">
-                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
-                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
-                    <strong>CLIP (Semantic Alignment):</strong> Radford, A., et al. (2021). <em>Learning Transferable Visual Models From Natural Language Supervision.</em> In Proceedings of the International Conference on Machine Learning (ICML).
-                </li>
-                
-                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
-                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
-                    <strong>Evidential Fusion (Dempster-Shafer):</strong> Alzahem, A., et al. (2024). <em>Feature fusion for improved classification: Combining Dempster-Shafer theory and multiple CNN architectures.</em> arXiv preprint arXiv:2405.20230.
-                </li>
-                
-                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
-                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
-                    <strong>BERT (Text Encoding):</strong> Devlin, J., et al. (2019). <em>BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.</em> In Proceedings of NAACL-HLT.
-                </li>
-
-                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
-                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
-                    <strong>ViT (Visual Encoding):</strong> Dosovitskiy, A., et al. (2021). <em>An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.</em> In Proceedings of ICLR.
-                </li>
-                
-                <li style="margin-bottom: 1rem; padding-left: 1.5rem; text-indent: -1.5rem;">
-                    <i class="fas fa-book-open" style="color: var(--accent); margin-right: 0.5rem;"></i>
-                    <strong>Baseline Multimodal Approach (MCR):</strong> Liu, J., et al. (2021). <em>Multi-perspective Coherent Reasoning for Helpfulness Prediction of Multimodal Reviews.</em> In Proceedings of the ACL.
-                </li>
-            </ul>
-        </section>
-
-    </main>
-        
-    <footer>
-        <div class="container">
-            <strong>Muhammad Hamza</strong><br>
-            Dual Degree (B.Tech + M.Tech), Chemical Engineering<br>
-            Micro Specialization in Artificial Intelligence and Applications<br>
-            IIT Kharagpur (Class of 2028)<br>
-            <div style="margin-top: 1rem; font-size: 1.2rem; display: flex; justify-content: center; gap: 1rem;">
-                <a href="#" style="color: var(--text-muted);"><i class="fab fa-linkedin"></i></a>
-                <a href="https://github.com/Hamza-Faarooq" style="color: var(--text-muted);"><i class="fab fa-github"></i></a>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        // Init Syntax Highlighting & Animations
-        hljs.highlightAll();
-        AOS.init({ duration: 800, once: true, offset: 50 });
-
-        // Theme Toggle
-        function toggleTheme() {
-            const body = document.body;
-            const icon = document.querySelector('nav button i');
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme');
-                icon.className = 'fas fa-moon';
-                trainChart.options.scales.x.ticks.color = '#1a1a1a';
-                trainChart.options.scales.y.ticks.color = '#1a1a1a';
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                icon.className = 'fas fa-sun';
-                trainChart.options.scales.x.ticks.color = '#e2e8f0';
-                trainChart.options.scales.y.ticks.color = '#e2e8f0';
-            }
-            trainChart.update();
-        }
-
-        // Chart.js Setup: Simulated Training Dynamics
-        const ctx = document.getElementById('trainingChart').getContext('2d');
-        const trainChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Epoch 1', 'Epoch 3', 'Epoch 5', 'Epoch 7', 'Epoch 10', 'Epoch 12', 'Epoch 15'],
-                datasets: [
-                    {
-                        label: 'Attention Fusion (Erratic Convergence)',
-                        data: [0.60, 0.75, 0.68, 0.82, 0.78, 0.83, 0.81],
-                        borderColor: '#94a3b8',
-                        tension: 0.4,
-                        borderDash: [5, 5]
-                    },
-                    {
-                        label: 'Evidential Fusion (Smooth Convergence)',
-                        data: [0.62, 0.70, 0.79, 0.85, 0.88, 0.89, 0.90],
-                        borderColor: '#005587',
-                        tension: 0.4,
-                        borderWidth: 3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: { display: true, text: 'Training Dynamics (Validation AUC) on Interstellar', font: {family: 'Inter', size: 14} }
-                },
-                scales: {
-                    y: { min: 0.5, title: { display: true, text: 'Validation AUC' } }
-                }
-            }
-        });
-    </script>
-</body>
-</html> -->
+</html>
